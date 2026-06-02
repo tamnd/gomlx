@@ -82,6 +82,20 @@ func (e *StreamEncoder) Content(text string, reasoning bool) error {
 	return err
 }
 
+// DeltaJSON emits a chunk whose delta is the caller-provided JSON object (for
+// example a tool-call delta the tool parser produced). The bytes must be a
+// complete JSON object such as {"tool_calls":[...]}; the envelope and trailing
+// finish_reason are added here.
+func (e *StreamEncoder) DeltaJSON(deltaJSON []byte) error {
+	buf := chunkBufPool.Get().([]byte)[:0]
+	buf = e.header(buf)
+	buf = append(buf, deltaJSON...)
+	buf = append(buf, `,"finish_reason":null}]}`...)
+	err := e.frame(buf)
+	chunkBufPool.Put(buf)
+	return err
+}
+
 // Finish emits the terminal chunk with a finish_reason and optional usage.
 func (e *StreamEncoder) Finish(reason string, usage *Usage) error {
 	buf := chunkBufPool.Get().([]byte)[:0]

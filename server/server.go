@@ -32,6 +32,7 @@ func New(cfg config.ServerConfig, eng engine.Engine) *App {
 			Engine:           eng,
 			Model:            cfg.Model,
 			DefaultMaxTokens: cfg.MaxTokens,
+			ToolCallParser:   cfg.ToolCallParser,
 		},
 	}
 }
@@ -41,6 +42,7 @@ func (a *App) Handler() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("POST /v1/chat/completions", a.deps.ChatCompletions)
 	mux.HandleFunc("POST /v1/completions", a.deps.Completions)
+	mux.HandleFunc("POST /v1/messages", a.deps.AnthropicMessages)
 	mux.HandleFunc("GET /v1/models", a.deps.Models)
 	mux.HandleFunc("GET /health", a.deps.Health)
 	mux.HandleFunc("GET /v1/health", a.deps.Health)

@@ -1,0 +1,1993 @@
+[
+  {
+    "parser": "llama",
+    "label": "single_call",
+    "full": "<function=get_weather>{\"city\": \"Paris\"}</function>",
+    "request": null,
+    "deltas": [
+      "<funct",
+      "ion=ge",
+      "t_weat",
+      "her>{\"",
+      "city\":",
+      " \"Pari",
+      "s\"}</f",
+      "unctio",
+      "n>"
+    ],
+    "extract": {
+      "tools_called": true,
+      "tool_calls": [
+        {
+          "name": "get_weather",
+          "arguments": "{\"city\": \"Paris\"}"
+        }
+      ],
+      "content": null
+    },
+    "stream": [
+      {
+        "content": "<funct",
+        "tool_calls": null
+      }
+    ]
+  },
+  {
+    "parser": "llama",
+    "label": "text_then_call",
+    "full": "Sure.<function=lookup>{\"q\": \"go\"}</function>",
+    "request": null,
+    "deltas": [
+      "Sure.<",
+      "functi",
+      "on=loo",
+      "kup>{\"",
+      "q\": \"g",
+      "o\"}</f",
+      "unctio",
+      "n>"
+    ],
+    "extract": {
+      "tools_called": true,
+      "tool_calls": [
+        {
+          "name": "lookup",
+          "arguments": "{\"q\": \"go\"}"
+        }
+      ],
+      "content": "Sure."
+    },
+    "stream": [
+      {
+        "content": "Sure.<",
+        "tool_calls": null
+      },
+      {
+        "content": "functi",
+        "tool_calls": null
+      }
+    ]
+  },
+  {
+    "parser": "llama",
+    "label": "stream",
+    "full": "<function=f>{\"a\": 1}</function>",
+    "request": null,
+    "deltas": [
+      "<function=f>",
+      "{\"a\": 1}",
+      "</function>"
+    ],
+    "extract": {
+      "tools_called": true,
+      "tool_calls": [
+        {
+          "name": "f",
+          "arguments": "{\"a\": 1}"
+        }
+      ],
+      "content": null
+    },
+    "stream": [
+      {
+        "content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "name": "f",
+            "arguments": "{\"a\": 1}"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "parser": "llama",
+    "label": "no_call",
+    "full": "just a plain answer",
+    "request": null,
+    "deltas": [
+      "just a",
+      " plain",
+      " answe",
+      "r"
+    ],
+    "extract": {
+      "tools_called": false,
+      "tool_calls": [],
+      "content": "just a plain answer"
+    },
+    "stream": [
+      {
+        "content": "just a",
+        "tool_calls": null
+      },
+      {
+        "content": " plain",
+        "tool_calls": null
+      },
+      {
+        "content": " answe",
+        "tool_calls": null
+      },
+      {
+        "content": "r",
+        "tool_calls": null
+      }
+    ]
+  },
+  {
+    "parser": "granite",
+    "label": "tool_call_marker",
+    "full": "<|tool_call|>[{\"name\": \"search\", \"arguments\": {\"q\": \"go\"}}]",
+    "request": null,
+    "deltas": [
+      "<|tool",
+      "_call|",
+      ">[{\"na",
+      "me\": \"",
+      "search",
+      "\", \"ar",
+      "gument",
+      "s\": {\"",
+      "q\": \"g",
+      "o\"}}]"
+    ],
+    "extract": {
+      "tools_called": true,
+      "tool_calls": [
+        {
+          "name": "search",
+          "arguments": "{\"q\": \"go\"}"
+        }
+      ],
+      "content": null
+    },
+    "stream": [
+      {
+        "content": "<|tool",
+        "tool_calls": null
+      },
+      {
+        "content": "_call|",
+        "tool_calls": null
+      },
+      {
+        "content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "name": "search",
+            "arguments": "{\"q\": \"go\"}"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "parser": "granite",
+    "label": "type_field",
+    "full": "<tool_call>[{\"type\": \"ping\", \"arguments\": {}}]",
+    "request": null,
+    "deltas": [
+      "<tool_",
+      "call>[",
+      "{\"type",
+      "\": \"pi",
+      "ng\", \"",
+      "argume",
+      "nts\": ",
+      "{}}]"
+    ],
+    "extract": {
+      "tools_called": true,
+      "tool_calls": [
+        {
+          "name": "ping",
+          "arguments": "{}"
+        }
+      ],
+      "content": null
+    },
+    "stream": [
+      {
+        "content": "<tool_",
+        "tool_calls": null
+      },
+      {
+        "content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "name": "ping",
+            "arguments": "{}"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "parser": "granite",
+    "label": "stream",
+    "full": "<|tool_call|>[{\"name\": \"search\", \"arguments\": {\"q\": \"go\"}}]",
+    "request": null,
+    "deltas": [
+      "<|tool_call|>[{\"name\": \"search\", ",
+      "\"arguments\": {\"q\": \"go\"}}",
+      "]"
+    ],
+    "extract": {
+      "tools_called": true,
+      "tool_calls": [
+        {
+          "name": "search",
+          "arguments": "{\"q\": \"go\"}"
+        }
+      ],
+      "content": null
+    },
+    "stream": [
+      {
+        "content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "name": "search",
+            "arguments": "{\"q\": \"go\"}"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "parser": "kimi",
+    "label": "single",
+    "full": "<|tool_call_begin|>functions.get_weather:0<|tool_call_argument_begin|>{\"city\": \"Paris\"}<|tool_call_end|>",
+    "request": null,
+    "deltas": [
+      "<|tool",
+      "_call_",
+      "begin|",
+      ">funct",
+      "ions.g",
+      "et_wea",
+      "ther:0",
+      "<|tool",
+      "_call_",
+      "argume",
+      "nt_beg",
+      "in|>{\"",
+      "city\":",
+      " \"Pari",
+      "s\"}<|t",
+      "ool_ca",
+      "ll_end",
+      "|>"
+    ],
+    "extract": {
+      "tools_called": true,
+      "tool_calls": [
+        {
+          "name": "get_weather",
+          "arguments": "{\"city\": \"Paris\"}"
+        }
+      ],
+      "content": null
+    },
+    "stream": [
+      {
+        "content": "<|tool",
+        "tool_calls": null
+      },
+      {
+        "content": "_call_",
+        "tool_calls": null
+      },
+      {
+        "content": "begin|",
+        "tool_calls": null
+      }
+    ]
+  },
+  {
+    "parser": "kimi",
+    "label": "text_before",
+    "full": "Let me check.<|tool_call_begin|>functions.f:1<|tool_call_argument_begin|>{\"a\": 1}<|tool_call_end|>",
+    "request": null,
+    "deltas": [
+      "Let me",
+      " check",
+      ".<|too",
+      "l_call",
+      "_begin",
+      "|>func",
+      "tions.",
+      "f:1<|t",
+      "ool_ca",
+      "ll_arg",
+      "ument_",
+      "begin|",
+      ">{\"a\":",
+      " 1}<|t",
+      "ool_ca",
+      "ll_end",
+      "|>"
+    ],
+    "extract": {
+      "tools_called": true,
+      "tool_calls": [
+        {
+          "name": "f",
+          "arguments": "{\"a\": 1}"
+        }
+      ],
+      "content": null
+    },
+    "stream": [
+      {
+        "content": "Let me",
+        "tool_calls": null
+      },
+      {
+        "content": " check",
+        "tool_calls": null
+      },
+      {
+        "content": ".<|too",
+        "tool_calls": null
+      },
+      {
+        "content": "l_call",
+        "tool_calls": null
+      },
+      {
+        "content": "_begin",
+        "tool_calls": null
+      }
+    ]
+  },
+  {
+    "parser": "nemotron",
+    "label": "json_body",
+    "full": "<tool_call><function=foo>{\"a\": 1}</function></tool_call>",
+    "request": null,
+    "deltas": [
+      "<tool_",
+      "call><",
+      "functi",
+      "on=foo",
+      ">{\"a\":",
+      " 1}</f",
+      "unctio",
+      "n></to",
+      "ol_cal",
+      "l>"
+    ],
+    "extract": {
+      "tools_called": true,
+      "tool_calls": [
+        {
+          "name": "foo",
+          "arguments": "{\"a\": 1}"
+        }
+      ],
+      "content": null
+    },
+    "stream": [
+      {
+        "content": "<tool_",
+        "tool_calls": null
+      }
+    ]
+  },
+  {
+    "parser": "nemotron",
+    "label": "param_body",
+    "full": "<tool_call><function=bar><parameter=x>hello</parameter></function></tool_call>",
+    "request": null,
+    "deltas": [
+      "<tool_",
+      "call><",
+      "functi",
+      "on=bar",
+      "><para",
+      "meter=",
+      "x>hell",
+      "o</par",
+      "ameter",
+      "></fun",
+      "ction>",
+      "</tool",
+      "_call>"
+    ],
+    "extract": {
+      "tools_called": true,
+      "tool_calls": [
+        {
+          "name": "bar",
+          "arguments": "{\"x\": \"hello\"}"
+        }
+      ],
+      "content": null
+    },
+    "stream": [
+      {
+        "content": "<tool_",
+        "tool_calls": null
+      }
+    ]
+  },
+  {
+    "parser": "deepseek",
+    "label": "single",
+    "full": "<｜tool▁calls▁begin｜><｜tool▁call▁begin｜>function<｜tool▁sep｜>get_weather\n```json\n{\"city\": \"Paris\"}\n```<｜tool▁call▁end｜><｜tool▁calls▁end｜>",
+    "request": null,
+    "deltas": [
+      "<｜tool",
+      "▁calls",
+      "▁begin",
+      "｜><｜to",
+      "ol▁cal",
+      "l▁begi",
+      "n｜>fun",
+      "ction<",
+      "｜tool▁",
+      "sep｜>g",
+      "et_wea",
+      "ther\n`",
+      "``json",
+      "\n{\"cit",
+      "y\": \"P",
+      "aris\"}",
+      "\n```<｜",
+      "tool▁c",
+      "all▁en",
+      "d｜><｜t",
+      "ool▁ca",
+      "lls▁en",
+      "d｜>"
+    ],
+    "extract": {
+      "tools_called": true,
+      "tool_calls": [
+        {
+          "name": "get_weather",
+          "arguments": "{\"city\": \"Paris\"}"
+        }
+      ],
+      "content": null
+    },
+    "stream": [
+      {
+        "content": "<｜tool",
+        "tool_calls": null
+      },
+      {
+        "content": "▁calls",
+        "tool_calls": null
+      },
+      {
+        "content": "▁begin",
+        "tool_calls": null
+      }
+    ]
+  },
+  {
+    "parser": "xlam",
+    "label": "code_fence",
+    "full": "```json\n[{\"name\": \"f\", \"arguments\": {\"a\": 1}}]\n```",
+    "request": null,
+    "deltas": [
+      "```jso",
+      "n\n[{\"n",
+      "ame\": ",
+      "\"f\", \"",
+      "argume",
+      "nts\": ",
+      "{\"a\": ",
+      "1}}]\n`",
+      "``"
+    ],
+    "extract": {
+      "tools_called": true,
+      "tool_calls": [
+        {
+          "name": "f",
+          "arguments": "{\"a\": 1}"
+        }
+      ],
+      "content": null
+    },
+    "stream": []
+  },
+  {
+    "parser": "xlam",
+    "label": "tool_calls_tag",
+    "full": "[TOOL_CALLS][{\"name\": \"g\", \"arguments\": {\"b\": 2}}]",
+    "request": null,
+    "deltas": [
+      "[TOOL_",
+      "CALLS]",
+      "[{\"nam",
+      "e\": \"g",
+      "\", \"ar",
+      "gument",
+      "s\": {\"",
+      "b\": 2}",
+      "}]"
+    ],
+    "extract": {
+      "tools_called": true,
+      "tool_calls": [
+        {
+          "name": "g",
+          "arguments": "{\"b\": 2}"
+        }
+      ],
+      "content": null
+    },
+    "stream": [
+      {
+        "content": "[TOOL_",
+        "tool_calls": null
+      },
+      {
+        "content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "name": "g",
+            "arguments": "{\"b\": 2}"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "parser": "qwen",
+    "label": "xml_json",
+    "full": "<tool_call>{\"name\": \"f\", \"arguments\": {\"a\": 1}}</tool_call>",
+    "request": null,
+    "deltas": [
+      "<tool_",
+      "call>{",
+      "\"name\"",
+      ": \"f\",",
+      " \"argu",
+      "ments\"",
+      ": {\"a\"",
+      ": 1}}<",
+      "/tool_",
+      "call>"
+    ],
+    "extract": {
+      "tools_called": true,
+      "tool_calls": [
+        {
+          "name": "f",
+          "arguments": "{\"a\": 1}"
+        }
+      ],
+      "content": null
+    },
+    "stream": [
+      {
+        "content": "<tool_",
+        "tool_calls": null
+      },
+      {
+        "content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "name": "f",
+            "arguments": "{\"a\": 1}"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "parser": "qwen",
+    "label": "bracket",
+    "full": "[Calling tool: f({\"a\": 1})]",
+    "request": null,
+    "deltas": [
+      "[Calli",
+      "ng too",
+      "l: f({",
+      "\"a\": 1",
+      "})]"
+    ],
+    "extract": {
+      "tools_called": true,
+      "tool_calls": [
+        {
+          "name": "f",
+          "arguments": "{\"a\": 1}"
+        }
+      ],
+      "content": null
+    },
+    "stream": [
+      {
+        "content": "[Calli",
+        "tool_calls": null
+      },
+      {
+        "content": "ng too",
+        "tool_calls": null
+      },
+      {
+        "content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "name": "f",
+            "arguments": "{\"a\": 1}"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "parser": "qwen",
+    "label": "stream_xml",
+    "full": "<tool_call>{\"name\": \"f\", \"arguments\": {\"a\": 1}}</tool_call>",
+    "request": null,
+    "deltas": [
+      "<tool_call>",
+      "{\"name\": \"f\", ",
+      "\"arguments\": {\"a\": 1}}",
+      "</tool_call>"
+    ],
+    "extract": {
+      "tools_called": true,
+      "tool_calls": [
+        {
+          "name": "f",
+          "arguments": "{\"a\": 1}"
+        }
+      ],
+      "content": null
+    },
+    "stream": [
+      {
+        "content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "name": "f",
+            "arguments": "{\"a\": 1}"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "parser": "functionary",
+    "label": "recipient",
+    "full": "<|recipient|>get_weather\n<|content|>{\"city\": \"Paris\"}",
+    "request": null,
+    "deltas": [
+      "<|reci",
+      "pient|",
+      ">get_w",
+      "eather",
+      "\n<|con",
+      "tent|>",
+      "{\"city",
+      "\": \"Pa",
+      "ris\"}"
+    ],
+    "extract": {
+      "tools_called": true,
+      "tool_calls": [
+        {
+          "name": "get_weather",
+          "arguments": "{\"city\": \"Paris\"}"
+        }
+      ],
+      "content": null
+    },
+    "stream": [
+      {
+        "content": "<|reci",
+        "tool_calls": null
+      },
+      {
+        "content": "pient|",
+        "tool_calls": null
+      }
+    ]
+  },
+  {
+    "parser": "glm47",
+    "label": "named",
+    "full": "<tool_call>get_weather\n<arg_key>city</arg_key><arg_value>Paris</arg_value></tool_call>",
+    "request": {
+      "tools": [
+        {
+          "type": "function",
+          "function": {
+            "name": "get_weather",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "city": {
+                  "type": "string"
+                },
+                "days": {
+                  "type": "integer"
+                },
+                "metric": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "deltas": [
+      "<tool_",
+      "call>g",
+      "et_wea",
+      "ther\n<",
+      "arg_ke",
+      "y>city",
+      "</arg_",
+      "key><a",
+      "rg_val",
+      "ue>Par",
+      "is</ar",
+      "g_valu",
+      "e></to",
+      "ol_cal",
+      "l>"
+    ],
+    "extract": {
+      "tools_called": true,
+      "tool_calls": [
+        {
+          "name": "get_weather",
+          "arguments": "{\"city\": \"Paris\"}"
+        }
+      ],
+      "content": null
+    },
+    "stream": [
+      {
+        "content": "<tool_",
+        "tool_calls": null
+      }
+    ]
+  },
+  {
+    "parser": "gemma4",
+    "label": "call",
+    "full": "<|tool_call>call:get_weather{city: \"Paris\"}<tool_call|>",
+    "request": null,
+    "deltas": [
+      "<|tool",
+      "_call>",
+      "call:g",
+      "et_wea",
+      "ther{c",
+      "ity: \"",
+      "Paris\"",
+      "}<tool",
+      "_call|",
+      ">"
+    ],
+    "extract": {
+      "tools_called": true,
+      "tool_calls": [
+        {
+          "name": "get_weather",
+          "arguments": "{\"city\": \"Paris\"}"
+        }
+      ],
+      "content": null
+    },
+    "stream": [
+      {
+        "content": "<|tool",
+        "tool_calls": null
+      },
+      {
+        "content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "name": "get_weather",
+            "arguments": "{\"city\": \"Paris\"}"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "parser": "mistral",
+    "label": "new_format",
+    "full": "[TOOL_CALLS]get_weather{\"city\": \"Paris\"}",
+    "request": null,
+    "deltas": [
+      "[TOOL_",
+      "CALLS]",
+      "get_we",
+      "ather{",
+      "\"city\"",
+      ": \"Par",
+      "is\"}"
+    ],
+    "extract": {
+      "tools_called": true,
+      "tool_calls": [
+        {
+          "name": "get_weather",
+          "arguments": "{\"city\": \"Paris\"}"
+        }
+      ],
+      "content": null
+    },
+    "stream": [
+      {
+        "content": "[TOOL_",
+        "tool_calls": null
+      }
+    ]
+  },
+  {
+    "parser": "mistral",
+    "label": "old_array",
+    "full": "[TOOL_CALLS][{\"name\": \"f\", \"arguments\": {\"a\": 1}}]",
+    "request": null,
+    "deltas": [
+      "[TOOL_",
+      "CALLS]",
+      "[{\"nam",
+      "e\": \"f",
+      "\", \"ar",
+      "gument",
+      "s\": {\"",
+      "a\": 1}",
+      "}]"
+    ],
+    "extract": {
+      "tools_called": true,
+      "tool_calls": [
+        {
+          "name": "f",
+          "arguments": "{\"a\": 1}"
+        }
+      ],
+      "content": null
+    },
+    "stream": [
+      {
+        "content": "[TOOL_",
+        "tool_calls": null
+      }
+    ]
+  },
+  {
+    "parser": "hermes",
+    "label": "xml_json",
+    "full": "<tool_call>{\"name\": \"f\", \"arguments\": {\"a\": 1}}</tool_call>",
+    "request": null,
+    "deltas": [
+      "<tool_",
+      "call>{",
+      "\"name\"",
+      ": \"f\",",
+      " \"argu",
+      "ments\"",
+      ": {\"a\"",
+      ": 1}}<",
+      "/tool_",
+      "call>"
+    ],
+    "extract": {
+      "tools_called": true,
+      "tool_calls": [
+        {
+          "name": "f",
+          "arguments": "{\"a\": 1}"
+        }
+      ],
+      "content": null
+    },
+    "stream": [
+      {
+        "content": "<tool_",
+        "tool_calls": null
+      },
+      {
+        "content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "name": "f",
+            "arguments": "{\"a\": 1}"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "parser": "hermes",
+    "label": "text_before",
+    "full": "Sure thing.\n<tool_call>{\"name\": \"f\", \"arguments\": {\"a\": 1}}</tool_call>",
+    "request": null,
+    "deltas": [
+      "Sure t",
+      "hing.\n",
+      "<tool_",
+      "call>{",
+      "\"name\"",
+      ": \"f\",",
+      " \"argu",
+      "ments\"",
+      ": {\"a\"",
+      ": 1}}<",
+      "/tool_",
+      "call>"
+    ],
+    "extract": {
+      "tools_called": true,
+      "tool_calls": [
+        {
+          "name": "f",
+          "arguments": "{\"a\": 1}"
+        }
+      ],
+      "content": "Sure thing."
+    },
+    "stream": [
+      {
+        "content": "Sure t",
+        "tool_calls": null
+      },
+      {
+        "content": "hing.\n",
+        "tool_calls": null
+      },
+      {
+        "content": "<tool_",
+        "tool_calls": null
+      },
+      {
+        "content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "name": "f",
+            "arguments": "{\"a\": 1}"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "parser": "hermes",
+    "label": "stream",
+    "full": "<tool_call>{\"name\": \"f\", \"arguments\": {\"a\": 1}}</tool_call>",
+    "request": null,
+    "deltas": [
+      "<tool_call>",
+      "{\"name\": \"f\", \"arguments\": {\"a\": 1}}",
+      "</tool_call>"
+    ],
+    "extract": {
+      "tools_called": true,
+      "tool_calls": [
+        {
+          "name": "f",
+          "arguments": "{\"a\": 1}"
+        }
+      ],
+      "content": null
+    },
+    "stream": [
+      {
+        "content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "name": "f",
+            "arguments": "{\"a\": 1}"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "parser": "minimax",
+    "label": "invoke",
+    "full": "<minimax:tool_call><invoke name=\"get_weather\"><parameter name=\"city\">Paris</parameter></invoke></minimax:tool_call>",
+    "request": null,
+    "deltas": [
+      "<minim",
+      "ax:too",
+      "l_call",
+      "><invo",
+      "ke nam",
+      "e=\"get",
+      "_weath",
+      "er\"><p",
+      "aramet",
+      "er nam",
+      "e=\"cit",
+      "y\">Par",
+      "is</pa",
+      "ramete",
+      "r></in",
+      "voke><",
+      "/minim",
+      "ax:too",
+      "l_call",
+      ">"
+    ],
+    "extract": {
+      "tools_called": true,
+      "tool_calls": [
+        {
+          "name": "get_weather",
+          "arguments": "{\"city\": \"Paris\"}"
+        }
+      ],
+      "content": null
+    },
+    "stream": [
+      {
+        "content": "<minim",
+        "tool_calls": null
+      },
+      {
+        "content": "ax:too",
+        "tool_calls": null
+      },
+      {
+        "content": "l_call",
+        "tool_calls": null
+      },
+      {
+        "content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "name": "get_weather",
+            "arguments": "{\"city\": \"Paris\"}"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "parser": "harmony",
+    "label": "commentary_final",
+    "full": "<|channel|>commentary to=functions.get_weather<|message|>{\"city\": \"Paris\"}<|call|><|channel|>final<|message|>Here you go.<|return|>",
+    "request": null,
+    "deltas": [
+      "<|chan",
+      "nel|>c",
+      "omment",
+      "ary to",
+      "=funct",
+      "ions.g",
+      "et_wea",
+      "ther<|",
+      "messag",
+      "e|>{\"c",
+      "ity\": ",
+      "\"Paris",
+      "\"}<|ca",
+      "ll|><|",
+      "channe",
+      "l|>fin",
+      "al<|me",
+      "ssage|",
+      ">Here ",
+      "you go",
+      ".<|ret",
+      "urn|>"
+    ],
+    "extract": {
+      "tools_called": true,
+      "tool_calls": [
+        {
+          "name": "get_weather",
+          "arguments": "{\"city\": \"Paris\"}"
+        }
+      ],
+      "content": "Here you go."
+    },
+    "stream": [
+      {
+        "content": "<|chan",
+        "tool_calls": null
+      },
+      {
+        "content": "",
+        "tool_calls": null
+      },
+      {
+        "content": "",
+        "tool_calls": null
+      },
+      {
+        "content": "Here",
+        "tool_calls": null
+      },
+      {
+        "content": " you go",
+        "tool_calls": null
+      },
+      {
+        "content": ".<|ret",
+        "tool_calls": null
+      },
+      {
+        "content": "",
+        "tool_calls": null
+      }
+    ]
+  },
+  {
+    "parser": "harmony",
+    "label": "commentary_only",
+    "full": "to=functions.f<|channel|>commentary<|message|>{\"a\": 1}<|call|>",
+    "request": null,
+    "deltas": [
+      "to=fun",
+      "ctions",
+      ".f<|ch",
+      "annel|",
+      ">comme",
+      "ntary<",
+      "|messa",
+      "ge|>{\"",
+      "a\": 1}",
+      "<|call",
+      "|>"
+    ],
+    "extract": {
+      "tools_called": true,
+      "tool_calls": [
+        {
+          "name": "f",
+          "arguments": "{\"a\": 1}"
+        }
+      ],
+      "content": null
+    },
+    "stream": [
+      {
+        "content": "to=fun",
+        "tool_calls": null
+      },
+      {
+        "content": "ctions",
+        "tool_calls": null
+      },
+      {
+        "content": ".f<|ch",
+        "tool_calls": null
+      },
+      {
+        "content": "annel|",
+        "tool_calls": null
+      }
+    ]
+  },
+  {
+    "parser": "deepseek_v31",
+    "label": "single",
+    "full": "<｜tool▁calls▁begin｜><｜tool▁call▁begin｜>get_weather<｜tool▁sep｜>{\"city\": \"Paris\"}<｜tool▁call▁end｜><｜tool▁calls▁end｜>",
+    "request": null,
+    "deltas": [
+      "<｜tool",
+      "▁calls",
+      "▁begin",
+      "｜><｜to",
+      "ol▁cal",
+      "l▁begi",
+      "n｜>get",
+      "_weath",
+      "er<｜to",
+      "ol▁sep",
+      "｜>{\"ci",
+      "ty\": \"",
+      "Paris\"",
+      "}<｜too",
+      "l▁call",
+      "▁end｜>",
+      "<｜tool",
+      "▁calls",
+      "▁end｜>"
+    ],
+    "extract": {
+      "tools_called": true,
+      "tool_calls": [
+        {
+          "name": "get_weather",
+          "arguments": "{\"city\": \"Paris\"}"
+        }
+      ],
+      "content": null
+    },
+    "stream": [
+      {
+        "content": "<｜tool",
+        "tool_calls": null
+      },
+      {
+        "content": "▁calls",
+        "tool_calls": null
+      },
+      {
+        "content": "▁begin",
+        "tool_calls": null
+      },
+      {
+        "content": "｜><｜to",
+        "tool_calls": null
+      },
+      {
+        "content": "ol▁cal",
+        "tool_calls": null
+      },
+      {
+        "content": "l▁begi",
+        "tool_calls": null
+      },
+      {
+        "content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "name": "get_weather",
+            "arguments": ""
+          }
+        ]
+      },
+      {
+        "content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "name": null,
+            "arguments": "{\"city\": \""
+          }
+        ]
+      },
+      {
+        "content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "name": null,
+            "arguments": "Paris\""
+          }
+        ]
+      },
+      {
+        "content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "name": null,
+            "arguments": "}<｜too"
+          }
+        ]
+      },
+      {
+        "content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "name": null,
+            "arguments": "l▁call"
+          }
+        ]
+      },
+      {
+        "content": "<｜tool",
+        "tool_calls": null
+      },
+      {
+        "content": "▁calls",
+        "tool_calls": null
+      },
+      {
+        "content": "▁end｜>",
+        "tool_calls": null
+      }
+    ]
+  },
+  {
+    "parser": "seed_oss",
+    "label": "typed",
+    "full": "<seed:tool_call><function=get_weather><parameter=city>Paris</parameter><parameter=days>3</parameter></function></seed:tool_call>",
+    "request": {
+      "tools": [
+        {
+          "type": "function",
+          "function": {
+            "name": "get_weather",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "city": {
+                  "type": "string"
+                },
+                "days": {
+                  "type": "integer"
+                },
+                "metric": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "deltas": [
+      "<seed:",
+      "tool_c",
+      "all><f",
+      "unctio",
+      "n=get_",
+      "weathe",
+      "r><par",
+      "ameter",
+      "=city>",
+      "Paris<",
+      "/param",
+      "eter><",
+      "parame",
+      "ter=da",
+      "ys>3</",
+      "parame",
+      "ter></",
+      "functi",
+      "on></s",
+      "eed:to",
+      "ol_cal",
+      "l>"
+    ],
+    "extract": {
+      "tools_called": true,
+      "tool_calls": [
+        {
+          "name": "get_weather",
+          "arguments": "{\"city\": \"Paris\", \"days\": 3}"
+        }
+      ],
+      "content": null
+    },
+    "stream": [
+      {
+        "content": "<seed:",
+        "tool_calls": null
+      },
+      {
+        "content": "tool_c",
+        "tool_calls": null
+      },
+      {
+        "content": "all><f",
+        "tool_calls": null
+      },
+      {
+        "content": "unctio",
+        "tool_calls": null
+      },
+      {
+        "content": "n=get_",
+        "tool_calls": null
+      },
+      {
+        "content": "weathe",
+        "tool_calls": null
+      },
+      {
+        "content": "r><par",
+        "tool_calls": null
+      },
+      {
+        "content": "ameter",
+        "tool_calls": null
+      },
+      {
+        "content": "=city>",
+        "tool_calls": null
+      },
+      {
+        "content": "Paris<",
+        "tool_calls": null
+      },
+      {
+        "content": "/param",
+        "tool_calls": null
+      },
+      {
+        "content": "eter><",
+        "tool_calls": null
+      },
+      {
+        "content": "parame",
+        "tool_calls": null
+      },
+      {
+        "content": "ter=da",
+        "tool_calls": null
+      },
+      {
+        "content": "ys>3</",
+        "tool_calls": null
+      },
+      {
+        "content": "parame",
+        "tool_calls": null
+      },
+      {
+        "content": "ter></",
+        "tool_calls": null
+      },
+      {
+        "content": "functi",
+        "tool_calls": null
+      },
+      {
+        "content": "on></s",
+        "tool_calls": null
+      },
+      {
+        "content": "eed:to",
+        "tool_calls": null
+      },
+      {
+        "content": "ol_cal",
+        "tool_calls": null
+      },
+      {
+        "content": "l>",
+        "tool_calls": null
+      }
+    ]
+  },
+  {
+    "parser": "seed_oss",
+    "label": "stream",
+    "full": "<seed:tool_call><function=get_weather><parameter=city>Paris</parameter></function></seed:tool_call>",
+    "request": {
+      "tools": [
+        {
+          "type": "function",
+          "function": {
+            "name": "get_weather",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "city": {
+                  "type": "string"
+                },
+                "days": {
+                  "type": "integer"
+                },
+                "metric": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "deltas": [
+      "<seed:tool_call>",
+      "<function=get_weather>",
+      "<parameter=city>Paris</parameter>",
+      "</function>",
+      "</seed:tool_call>"
+    ],
+    "extract": {
+      "tools_called": true,
+      "tool_calls": [
+        {
+          "name": "get_weather",
+          "arguments": "{\"city\": \"Paris\"}"
+        }
+      ],
+      "content": null
+    },
+    "stream": [
+      {
+        "content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "name": "get_weather",
+            "arguments": ""
+          }
+        ]
+      },
+      {
+        "content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "name": null,
+            "arguments": "{"
+          }
+        ]
+      },
+      {
+        "content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "name": null,
+            "arguments": "}"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "parser": "qwen3_coder_xml",
+    "label": "typed",
+    "full": "<tool_call><function=get_weather><parameter=city>Paris</parameter><parameter=days>3</parameter><parameter=metric>true</parameter></function></tool_call>",
+    "request": {
+      "tools": [
+        {
+          "type": "function",
+          "function": {
+            "name": "get_weather",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "city": {
+                  "type": "string"
+                },
+                "days": {
+                  "type": "integer"
+                },
+                "metric": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "deltas": [
+      "<tool_",
+      "call><",
+      "functi",
+      "on=get",
+      "_weath",
+      "er><pa",
+      "ramete",
+      "r=city",
+      ">Paris",
+      "</para",
+      "meter>",
+      "<param",
+      "eter=d",
+      "ays>3<",
+      "/param",
+      "eter><",
+      "parame",
+      "ter=me",
+      "tric>t",
+      "rue</p",
+      "aramet",
+      "er></f",
+      "unctio",
+      "n></to",
+      "ol_cal",
+      "l>"
+    ],
+    "extract": {
+      "tools_called": true,
+      "tool_calls": [
+        {
+          "name": "get_weather",
+          "arguments": "{\"city\": \"Paris\", \"days\": 3, \"metric\": true}"
+        }
+      ],
+      "content": null
+    },
+    "stream": [
+      {
+        "content": "<tool_",
+        "tool_calls": null
+      },
+      {
+        "content": "call><",
+        "tool_calls": null
+      },
+      {
+        "content": "functi",
+        "tool_calls": null
+      },
+      {
+        "content": "on=get",
+        "tool_calls": null
+      },
+      {
+        "content": "_weath",
+        "tool_calls": null
+      },
+      {
+        "content": "er><pa",
+        "tool_calls": null
+      },
+      {
+        "content": "ramete",
+        "tool_calls": null
+      },
+      {
+        "content": "r=city",
+        "tool_calls": null
+      },
+      {
+        "content": ">Paris",
+        "tool_calls": null
+      },
+      {
+        "content": "</para",
+        "tool_calls": null
+      },
+      {
+        "content": "meter>",
+        "tool_calls": null
+      },
+      {
+        "content": "<param",
+        "tool_calls": null
+      },
+      {
+        "content": "eter=d",
+        "tool_calls": null
+      },
+      {
+        "content": "ays>3<",
+        "tool_calls": null
+      },
+      {
+        "content": "/param",
+        "tool_calls": null
+      },
+      {
+        "content": "eter><",
+        "tool_calls": null
+      },
+      {
+        "content": "parame",
+        "tool_calls": null
+      },
+      {
+        "content": "ter=me",
+        "tool_calls": null
+      },
+      {
+        "content": "tric>t",
+        "tool_calls": null
+      },
+      {
+        "content": "rue</p",
+        "tool_calls": null
+      },
+      {
+        "content": "aramet",
+        "tool_calls": null
+      },
+      {
+        "content": "er></f",
+        "tool_calls": null
+      },
+      {
+        "content": "unctio",
+        "tool_calls": null
+      },
+      {
+        "content": "n></to",
+        "tool_calls": null
+      },
+      {
+        "content": "ol_cal",
+        "tool_calls": null
+      },
+      {
+        "content": "l>",
+        "tool_calls": null
+      }
+    ]
+  },
+  {
+    "parser": "qwen3_coder_xml",
+    "label": "stream",
+    "full": "<tool_call><function=get_weather><parameter=city>Paris</parameter></function></tool_call>",
+    "request": {
+      "tools": [
+        {
+          "type": "function",
+          "function": {
+            "name": "get_weather",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "city": {
+                  "type": "string"
+                },
+                "days": {
+                  "type": "integer"
+                },
+                "metric": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "deltas": [
+      "<tool_call>",
+      "<function=get_weather>",
+      "<parameter=city>Paris</parameter>",
+      "</function>",
+      "</tool_call>"
+    ],
+    "extract": {
+      "tools_called": true,
+      "tool_calls": [
+        {
+          "name": "get_weather",
+          "arguments": "{\"city\": \"Paris\"}"
+        }
+      ],
+      "content": null
+    },
+    "stream": [
+      {
+        "content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "name": "get_weather",
+            "arguments": ""
+          }
+        ]
+      },
+      {
+        "content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "name": null,
+            "arguments": "{"
+          }
+        ]
+      },
+      {
+        "content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "name": null,
+            "arguments": "\"city\": \"Paris\""
+          }
+        ]
+      },
+      {
+        "content": null,
+        "tool_calls": [
+          {
+            "index": 0,
+            "name": null,
+            "arguments": "}"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "parser": "auto",
+    "label": "mistral",
+    "full": "[TOOL_CALLS]f{\"a\": 1}",
+    "request": null,
+    "deltas": [
+      "[TOOL_",
+      "CALLS]",
+      "f{\"a\":",
+      " 1}"
+    ],
+    "extract": {
+      "tools_called": true,
+      "tool_calls": [
+        {
+          "name": "f",
+          "arguments": "{\"a\": 1}"
+        }
+      ],
+      "content": null
+    },
+    "stream": [
+      {
+        "content": "[TOOL_",
+        "tool_calls": null
+      }
+    ]
+  },
+  {
+    "parser": "auto",
+    "label": "qwen_xml",
+    "full": "<tool_call>{\"name\": \"f\", \"arguments\": {\"a\": 1}}</tool_call>",
+    "request": null,
+    "deltas": [
+      "<tool_",
+      "call>{",
+      "\"name\"",
+      ": \"f\",",
+      " \"argu",
+      "ments\"",
+      ": {\"a\"",
+      ": 1}}<",
+      "/tool_",
+      "call>"
+    ],
+    "extract": {
+      "tools_called": true,
+      "tool_calls": [
+        {
+          "name": "f",
+          "arguments": "{\"a\": 1}"
+        }
+      ],
+      "content": null
+    },
+    "stream": [
+      {
+        "content": "<tool_",
+        "tool_calls": null
+      }
+    ]
+  },
+  {
+    "parser": "auto",
+    "label": "llama",
+    "full": "<function=f>{\"a\": 1}</function>",
+    "request": null,
+    "deltas": [
+      "<funct",
+      "ion=f>",
+      "{\"a\": ",
+      "1}</fu",
+      "nction",
+      ">"
+    ],
+    "extract": {
+      "tools_called": true,
+      "tool_calls": [
+        {
+          "name": "f",
+          "arguments": "{\"a\": 1}"
+        }
+      ],
+      "content": null
+    },
+    "stream": [
+      {
+        "content": "<funct",
+        "tool_calls": null
+      }
+    ]
+  },
+  {
+    "parser": "auto",
+    "label": "raw_json",
+    "full": "{\"name\": \"f\", \"arguments\": {\"a\": 1}}",
+    "request": null,
+    "deltas": [
+      "{\"name",
+      "\": \"f\"",
+      ", \"arg",
+      "uments",
+      "\": {\"a",
+      "\": 1}}"
+    ],
+    "extract": {
+      "tools_called": true,
+      "tool_calls": [
+        {
+          "name": "f",
+          "arguments": "{\"a\": 1}"
+        }
+      ],
+      "content": null
+    },
+    "stream": [
+      {
+        "content": "{\"name",
+        "tool_calls": null
+      },
+      {
+        "content": "\": \"f\"",
+        "tool_calls": null
+      },
+      {
+        "content": ", \"arg",
+        "tool_calls": null
+      },
+      {
+        "content": "uments",
+        "tool_calls": null
+      },
+      {
+        "content": "\": {\"a",
+        "tool_calls": null
+      },
+      {
+        "content": "\": 1}}",
+        "tool_calls": null
+      }
+    ]
+  },
+  {
+    "parser": "auto",
+    "label": "plain",
+    "full": "no tool call here",
+    "request": null,
+    "deltas": [
+      "no too",
+      "l call",
+      " here"
+    ],
+    "extract": {
+      "tools_called": false,
+      "tool_calls": [],
+      "content": "no tool call here"
+    },
+    "stream": [
+      {
+        "content": "no too",
+        "tool_calls": null
+      },
+      {
+        "content": "l call",
+        "tool_calls": null
+      },
+      {
+        "content": " here",
+        "tool_calls": null
+      }
+    ]
+  }
+]
