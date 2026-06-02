@@ -18,10 +18,30 @@ forward passes, KV caches, and samplers reimplemented in Go) is the hard part an
 
 ## Build
 
+The default build is pure Go and runs everywhere, including Linux CI. It uses a mock decode backend,
+so the full HTTP path, the parsers, and the numeric core (sampler, logits processors, cache
+bookkeeping, safetensors loading) all build and test without a GPU.
+
 ```
-go build ./...
-go test ./...
+go build ./...        # or: make build
+go test ./...         # or: make test
 ```
+
+### GPU backend (Apple Silicon)
+
+Real inference links the MLX C API through cgo, which only compiles on Apple Silicon with an MLX
+runtime present. A helper builds and installs that runtime into `third_party/mlx-c`, the path the
+cgo binding expects:
+
+```
+make mlx-deps         # clone and build mlx-c into third_party/mlx-c
+make build-mlx        # go build -tags mlx ./...
+```
+
+Without the `mlx` tag the backend reports itself unavailable and the server falls back to the mock
+engine, so a missing MLX never breaks the build. Building MLX from source needs several gigabytes of
+free disk; `scripts/bootstrap_mlx.sh` warns when space is tight and honors `MLX_C_REPO` and
+`MLX_C_REF` to point at a pinned or prebuilt release.
 
 ## Usage
 
