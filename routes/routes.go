@@ -18,6 +18,10 @@ type Deps struct {
 	Engine           engine.Engine
 	Model            string
 	DefaultMaxTokens int
+
+	// ToolCallParser names the wire format used to extract tool calls from
+	// model output. Empty falls back to the auto parser.
+	ToolCallParser string
 }
 
 // writeJSON serializes v as JSON with the given status.

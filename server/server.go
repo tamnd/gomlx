@@ -32,6 +32,7 @@ func New(cfg config.ServerConfig, eng engine.Engine) *App {
 			Engine:           eng,
 			Model:            cfg.Model,
 			DefaultMaxTokens: cfg.MaxTokens,
+			ToolCallParser:   cfg.ToolCallParser,
 		},
 	}
 }
