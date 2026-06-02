@@ -16,3 +16,6 @@ go.work.sum
 
 # Local model + cache dirs
 /.cache/
+
+# Locally built MLX C runtime (see scripts/bootstrap_mlx.sh)
+/third_party/
