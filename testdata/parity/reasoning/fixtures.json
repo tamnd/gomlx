@@ -1,0 +1,1366 @@
+[
+  {
+    "parser": "qwen3",
+    "label": "both_tags",
+    "full": "<think>Let me analyze this.</think>The answer is 42.",
+    "deltas": [
+      "<think",
+      ">Let m",
+      "e anal",
+      "yze th",
+      "is.</t",
+      "hink>T",
+      "he ans",
+      "wer is",
+      " 42."
+    ],
+    "extract": {
+      "reasoning": "Let me analyze this.",
+      "content": "The answer is 42."
+    },
+    "stream": [
+      {
+        "reasoning": "<think",
+        "content": null
+      },
+      {
+        "reasoning": null,
+        "content": ">Let m"
+      },
+      {
+        "reasoning": "e anal",
+        "content": null
+      },
+      {
+        "reasoning": "yze th",
+        "content": null
+      },
+      {
+        "reasoning": "is.</t",
+        "content": null
+      },
+      {
+        "reasoning": "hink>T",
+        "content": null
+      },
+      {
+        "reasoning": null,
+        "content": "he ans"
+      },
+      {
+        "reasoning": null,
+        "content": "wer is"
+      },
+      {
+        "reasoning": null,
+        "content": " 42."
+      }
+    ],
+    "finalize": null
+  },
+  {
+    "parser": "qwen3",
+    "label": "implicit_close",
+    "full": "reasoning here</think>final answer",
+    "deltas": [
+      "reason",
+      "ing he",
+      "re</th",
+      "ink>fi",
+      "nal an",
+      "swer"
+    ],
+    "extract": {
+      "reasoning": "reasoning here",
+      "content": "final answer"
+    },
+    "stream": [
+      {
+        "reasoning": "reason",
+        "content": null
+      },
+      {
+        "reasoning": "ing he",
+        "content": null
+      },
+      {
+        "reasoning": "re</th",
+        "content": null
+      },
+      {
+        "reasoning": "ink>fi",
+        "content": null
+      },
+      {
+        "reasoning": null,
+        "content": "nal an"
+      },
+      {
+        "reasoning": null,
+        "content": "swer"
+      }
+    ],
+    "finalize": null
+  },
+  {
+    "parser": "qwen3",
+    "label": "only_open_truncated",
+    "full": "<think>still thinking with no close",
+    "deltas": [
+      "<think",
+      ">still",
+      " think",
+      "ing wi",
+      "th no ",
+      "close"
+    ],
+    "extract": {
+      "reasoning": "still thinking with no close",
+      "content": null
+    },
+    "stream": [
+      {
+        "reasoning": "<think",
+        "content": null
+      },
+      {
+        "reasoning": null,
+        "content": ">still"
+      },
+      {
+        "reasoning": " think",
+        "content": null
+      },
+      {
+        "reasoning": "ing wi",
+        "content": null
+      },
+      {
+        "reasoning": "th no ",
+        "content": null
+      },
+      {
+        "reasoning": "close",
+        "content": null
+      }
+    ],
+    "finalize": {
+      "reasoning": null,
+      "content": "still thinking with no close"
+    }
+  },
+  {
+    "parser": "qwen3",
+    "label": "no_tags",
+    "full": "Just a plain answer.",
+    "deltas": [
+      "Just a",
+      " plain",
+      " answe",
+      "r."
+    ],
+    "extract": {
+      "reasoning": null,
+      "content": "Just a plain answer."
+    },
+    "stream": [
+      {
+        "reasoning": "Just a",
+        "content": null
+      },
+      {
+        "reasoning": " plain",
+        "content": null
+      },
+      {
+        "reasoning": " answe",
+        "content": null
+      },
+      {
+        "reasoning": "r.",
+        "content": null
+      }
+    ],
+    "finalize": {
+      "reasoning": null,
+      "content": "Just a plain answer."
+    }
+  },
+  {
+    "parser": "qwen3",
+    "label": "tags_split",
+    "full": "<think>step one ",
+    "deltas": [
+      "<think>",
+      "step one ",
+      "</think>",
+      "done"
+    ],
+    "extract": {
+      "reasoning": "step one",
+      "content": null
+    },
+    "stream": [
+      {
+        "reasoning": "step one ",
+        "content": null
+      },
+      {
+        "reasoning": null,
+        "content": "done"
+      }
+    ],
+    "finalize": null
+  },
+  {
+    "parser": "qwen3",
+    "label": "injected_no_close",
+    "full": "thinking only no close tag",
+    "deltas": [
+      "<think>",
+      "thinking ",
+      "only no close tag"
+    ],
+    "extract": {
+      "reasoning": null,
+      "content": "thinking only no close tag"
+    },
+    "stream": [
+      {
+        "reasoning": "thinking ",
+        "content": null
+      },
+      {
+        "reasoning": "only no close tag",
+        "content": null
+      }
+    ],
+    "finalize": {
+      "reasoning": null,
+      "content": "thinking only no close tag"
+    }
+  },
+  {
+    "parser": "deepseek_r1",
+    "label": "both_tags",
+    "full": "<think>Step 1\nStep 2</think>The answer is 42.",
+    "deltas": [
+      "<think",
+      ">Step ",
+      "1\nStep",
+      " 2</th",
+      "ink>Th",
+      "e answ",
+      "er is ",
+      "42."
+    ],
+    "extract": {
+      "reasoning": "Step 1\nStep 2",
+      "content": "The answer is 42."
+    },
+    "stream": [
+      {
+        "reasoning": "<think",
+        "content": null
+      },
+      {
+        "reasoning": null,
+        "content": ">Step "
+      },
+      {
+        "reasoning": "1\nStep",
+        "content": null
+      },
+      {
+        "reasoning": " 2</th",
+        "content": null
+      },
+      {
+        "reasoning": "ink>Th",
+        "content": null
+      },
+      {
+        "reasoning": null,
+        "content": "e answ"
+      },
+      {
+        "reasoning": null,
+        "content": "er is "
+      },
+      {
+        "reasoning": null,
+        "content": "42."
+      }
+    ],
+    "finalize": null
+  },
+  {
+    "parser": "deepseek_r1",
+    "label": "implicit_no_open",
+    "full": "reasoning content</think>final answer",
+    "deltas": [
+      "reason",
+      "ing co",
+      "ntent<",
+      "/think",
+      ">final",
+      " answe",
+      "r"
+    ],
+    "extract": {
+      "reasoning": "reasoning content",
+      "content": "final answer"
+    },
+    "stream": [
+      {
+        "reasoning": "reason",
+        "content": null
+      },
+      {
+        "reasoning": "ing co",
+        "content": null
+      },
+      {
+        "reasoning": "ntent<",
+        "content": null
+      },
+      {
+        "reasoning": "/think",
+        "content": null
+      },
+      {
+        "reasoning": ">final",
+        "content": null
+      },
+      {
+        "reasoning": null,
+        "content": " answe"
+      },
+      {
+        "reasoning": null,
+        "content": "r"
+      }
+    ],
+    "finalize": null
+  },
+  {
+    "parser": "deepseek_r1",
+    "label": "no_tags_short",
+    "full": "Hello there.",
+    "deltas": [
+      "Hello ",
+      "there."
+    ],
+    "extract": {
+      "reasoning": null,
+      "content": "Hello there."
+    },
+    "stream": [
+      {
+        "reasoning": "Hello ",
+        "content": null
+      },
+      {
+        "reasoning": "there.",
+        "content": null
+      }
+    ],
+    "finalize": {
+      "reasoning": null,
+      "content": "Hello there."
+    }
+  },
+  {
+    "parser": "deepseek_r1",
+    "label": "no_tags_long",
+    "full": "This is a long piece of plain content that goes well beyond the sixty four character threshold for sure.",
+    "deltas": [
+      "This i",
+      "s a lo",
+      "ng pie",
+      "ce of ",
+      "plain ",
+      "conten",
+      "t that",
+      " goes ",
+      "well b",
+      "eyond ",
+      "the si",
+      "xty fo",
+      "ur cha",
+      "racter",
+      " thres",
+      "hold f",
+      "or sur",
+      "e."
+    ],
+    "extract": {
+      "reasoning": null,
+      "content": "This is a long piece of plain content that goes well beyond the sixty four character threshold for sure."
+    },
+    "stream": [
+      {
+        "reasoning": "This i",
+        "content": null
+      },
+      {
+        "reasoning": "s a lo",
+        "content": null
+      },
+      {
+        "reasoning": "ng pie",
+        "content": null
+      },
+      {
+        "reasoning": "ce of ",
+        "content": null
+      },
+      {
+        "reasoning": "plain ",
+        "content": null
+      },
+      {
+        "reasoning": "conten",
+        "content": null
+      },
+      {
+        "reasoning": "t that",
+        "content": null
+      },
+      {
+        "reasoning": " goes ",
+        "content": null
+      },
+      {
+        "reasoning": "well b",
+        "content": null
+      },
+      {
+        "reasoning": "eyond ",
+        "content": null
+      },
+      {
+        "reasoning": null,
+        "content": "the si"
+      },
+      {
+        "reasoning": null,
+        "content": "xty fo"
+      },
+      {
+        "reasoning": null,
+        "content": "ur cha"
+      },
+      {
+        "reasoning": null,
+        "content": "racter"
+      },
+      {
+        "reasoning": null,
+        "content": " thres"
+      },
+      {
+        "reasoning": null,
+        "content": "hold f"
+      },
+      {
+        "reasoning": null,
+        "content": "or sur"
+      },
+      {
+        "reasoning": null,
+        "content": "e."
+      }
+    ],
+    "finalize": null
+  },
+  {
+    "parser": "deepseek_r1",
+    "label": "close_in_delta_no_open",
+    "full": "abc</think>xyz",
+    "deltas": [
+      "abc",
+      "</think>",
+      "xyz"
+    ],
+    "extract": {
+      "reasoning": "abc",
+      "content": "xyz"
+    },
+    "stream": [
+      {
+        "reasoning": "abc",
+        "content": null
+      },
+      {
+        "reasoning": null,
+        "content": "xyz"
+      }
+    ],
+    "finalize": null
+  },
+  {
+    "parser": "deepseek_r1",
+    "label": "no_tags_short_stream",
+    "full": "hi there",
+    "deltas": [
+      "hi ",
+      "there"
+    ],
+    "extract": {
+      "reasoning": null,
+      "content": "hi there"
+    },
+    "stream": [
+      {
+        "reasoning": "hi ",
+        "content": null
+      },
+      {
+        "reasoning": "there",
+        "content": null
+      }
+    ],
+    "finalize": {
+      "reasoning": null,
+      "content": "hi there"
+    }
+  },
+  {
+    "parser": "glm4",
+    "label": "both_tags",
+    "full": "<think>reasoning</think>answer",
+    "deltas": [
+      "<think",
+      ">reaso",
+      "ning</",
+      "think>",
+      "answer"
+    ],
+    "extract": {
+      "reasoning": "reasoning",
+      "content": "answer"
+    },
+    "stream": [
+      {
+        "reasoning": null,
+        "content": "<think"
+      },
+      {
+        "reasoning": null,
+        "content": ">reaso"
+      },
+      {
+        "reasoning": "ning</",
+        "content": null
+      },
+      {
+        "reasoning": "think>",
+        "content": null
+      },
+      {
+        "reasoning": null,
+        "content": "answer"
+      }
+    ],
+    "finalize": null
+  },
+  {
+    "parser": "glm4",
+    "label": "no_tags_content",
+    "full": "Plain GLM content with no thinking.",
+    "deltas": [
+      "Plain ",
+      "GLM co",
+      "ntent ",
+      "with n",
+      "o thin",
+      "king."
+    ],
+    "extract": {
+      "reasoning": null,
+      "content": "Plain GLM content with no thinking."
+    },
+    "stream": [
+      {
+        "reasoning": null,
+        "content": "Plain "
+      },
+      {
+        "reasoning": null,
+        "content": "GLM co"
+      },
+      {
+        "reasoning": null,
+        "content": "ntent "
+      },
+      {
+        "reasoning": null,
+        "content": "with n"
+      },
+      {
+        "reasoning": null,
+        "content": "o thin"
+      },
+      {
+        "reasoning": null,
+        "content": "king."
+      }
+    ],
+    "finalize": null
+  },
+  {
+    "parser": "glm4",
+    "label": "box_markers",
+    "full": "<think>reason</think><|begin_of_box|>boxed answer<|end_of_box|>",
+    "deltas": [
+      "<think",
+      ">reaso",
+      "n</thi",
+      "nk><|b",
+      "egin_o",
+      "f_box|",
+      ">boxed",
+      " answe",
+      "r<|end",
+      "_of_bo",
+      "x|>"
+    ],
+    "extract": {
+      "reasoning": "reason",
+      "content": "boxed answer"
+    },
+    "stream": [
+      {
+        "reasoning": null,
+        "content": "<think"
+      },
+      {
+        "reasoning": null,
+        "content": ">reaso"
+      },
+      {
+        "reasoning": "n</thi",
+        "content": null
+      },
+      {
+        "reasoning": "nk><|b",
+        "content": null
+      },
+      {
+        "reasoning": null,
+        "content": "egin_o"
+      },
+      {
+        "reasoning": null,
+        "content": "f_box|"
+      },
+      {
+        "reasoning": null,
+        "content": ">boxed"
+      },
+      {
+        "reasoning": null,
+        "content": " answe"
+      },
+      {
+        "reasoning": null,
+        "content": "r<|end"
+      },
+      {
+        "reasoning": null,
+        "content": "_of_bo"
+      },
+      {
+        "reasoning": null,
+        "content": "x|>"
+      }
+    ],
+    "finalize": null
+  },
+  {
+    "parser": "glm4",
+    "label": "box_stream",
+    "full": "<|begin_of_box|>x<|end_of_box|>",
+    "deltas": [
+      "<|begin_of_box|>",
+      "x",
+      "<|end_of_box|>"
+    ],
+    "extract": {
+      "reasoning": null,
+      "content": "x"
+    },
+    "stream": [
+      {
+        "reasoning": null,
+        "content": "x"
+      }
+    ],
+    "finalize": null
+  },
+  {
+    "parser": "glm4",
+    "label": "no_tags_stream",
+    "full": "plain content streaming",
+    "deltas": [
+      "plain ",
+      "content ",
+      "streaming"
+    ],
+    "extract": {
+      "reasoning": null,
+      "content": "plain content streaming"
+    },
+    "stream": [
+      {
+        "reasoning": null,
+        "content": "plain "
+      },
+      {
+        "reasoning": null,
+        "content": "content "
+      },
+      {
+        "reasoning": null,
+        "content": "streaming"
+      }
+    ],
+    "finalize": null
+  },
+  {
+    "parser": "gemma4",
+    "label": "thought_and_content",
+    "full": "<|channel>thought\nthinking deeply<channel|><|channel>content\nthe reply<channel|>",
+    "deltas": [
+      "<|chan",
+      "nel>th",
+      "ought\n",
+      "thinki",
+      "ng dee",
+      "ply<ch",
+      "annel|",
+      "><|cha",
+      "nnel>c",
+      "ontent",
+      "\nthe r",
+      "eply<c",
+      "hannel",
+      "|>"
+    ],
+    "extract": {
+      "reasoning": "thinking deeply",
+      "content": "the reply"
+    },
+    "stream": [
+      {
+        "reasoning": null,
+        "content": "<|chan"
+      },
+      {
+        "reasoning": null,
+        "content": "nel>th"
+      },
+      {
+        "reasoning": "ought\n",
+        "content": null
+      },
+      {
+        "reasoning": "thinki",
+        "content": null
+      },
+      {
+        "reasoning": "ng dee",
+        "content": null
+      },
+      {
+        "reasoning": "ply<ch",
+        "content": null
+      },
+      {
+        "reasoning": "annel|",
+        "content": null
+      },
+      {
+        "reasoning": null,
+        "content": "><|cha"
+      },
+      {
+        "reasoning": null,
+        "content": "nnel>c"
+      },
+      {
+        "reasoning": null,
+        "content": "ontent"
+      },
+      {
+        "reasoning": null,
+        "content": "\nthe r"
+      },
+      {
+        "reasoning": null,
+        "content": "eply<c"
+      },
+      {
+        "reasoning": null,
+        "content": "hannel"
+      },
+      {
+        "reasoning": null,
+        "content": "|>"
+      }
+    ],
+    "finalize": null
+  },
+  {
+    "parser": "gemma4",
+    "label": "no_channel",
+    "full": "just content no channels",
+    "deltas": [
+      "just c",
+      "ontent",
+      " no ch",
+      "annels"
+    ],
+    "extract": {
+      "reasoning": null,
+      "content": "just content no channels"
+    },
+    "stream": [
+      {
+        "reasoning": null,
+        "content": "just c"
+      },
+      {
+        "reasoning": null,
+        "content": "ontent"
+      },
+      {
+        "reasoning": null,
+        "content": " no ch"
+      },
+      {
+        "reasoning": null,
+        "content": "annels"
+      }
+    ],
+    "finalize": null
+  },
+  {
+    "parser": "gemma4",
+    "label": "thought_only",
+    "full": "<|channel>thought\nonly reasoning<channel|>",
+    "deltas": [
+      "<|chan",
+      "nel>th",
+      "ought\n",
+      "only r",
+      "easoni",
+      "ng<cha",
+      "nnel|>"
+    ],
+    "extract": {
+      "reasoning": "only reasoning",
+      "content": null
+    },
+    "stream": [
+      {
+        "reasoning": null,
+        "content": "<|chan"
+      },
+      {
+        "reasoning": null,
+        "content": "nel>th"
+      },
+      {
+        "reasoning": "ought\n",
+        "content": null
+      },
+      {
+        "reasoning": "only r",
+        "content": null
+      },
+      {
+        "reasoning": "easoni",
+        "content": null
+      },
+      {
+        "reasoning": "ng<cha",
+        "content": null
+      },
+      {
+        "reasoning": null,
+        "content": "nnel|>"
+      }
+    ],
+    "finalize": null
+  },
+  {
+    "parser": "gemma4",
+    "label": "stream_flip",
+    "full": "<|channel>thought\nreason<channel|><|channel>content\nanswer<channel|>",
+    "deltas": [
+      "<|channel>thought\n",
+      "reason",
+      "<channel|>",
+      "<|channel>content\n",
+      "answer",
+      "<channel|>"
+    ],
+    "extract": {
+      "reasoning": "reason",
+      "content": "answer"
+    },
+    "stream": [
+      {
+        "reasoning": "reason",
+        "content": null
+      },
+      {
+        "reasoning": null,
+        "content": "answer"
+      }
+    ],
+    "finalize": null
+  },
+  {
+    "parser": "gpt_oss",
+    "label": "analysis_final",
+    "full": "<|channel|>analysis<|message|>thinking<|start|>assistant<|channel|>final<|message|>the answer<|return|>",
+    "deltas": [
+      "<|chan",
+      "nel|>a",
+      "nalysi",
+      "s<|mes",
+      "sage|>",
+      "thinki",
+      "ng<|st",
+      "art|>a",
+      "ssista",
+      "nt<|ch",
+      "annel|",
+      ">final",
+      "<|mess",
+      "age|>t",
+      "he ans",
+      "wer<|r",
+      "eturn|",
+      ">"
+    ],
+    "extract": {
+      "reasoning": "thinking",
+      "content": "the answer"
+    },
+    "stream": [
+      {
+        "reasoning": "thinki",
+        "content": null
+      },
+      {
+        "reasoning": "ng<|st",
+        "content": null
+      },
+      {
+        "reasoning": null,
+        "content": "t"
+      },
+      {
+        "reasoning": null,
+        "content": "he ans"
+      },
+      {
+        "reasoning": null,
+        "content": "wer<|r"
+      },
+      {
+        "reasoning": null,
+        "content": "eturn|"
+      },
+      {
+        "reasoning": null,
+        "content": ">"
+      }
+    ],
+    "finalize": null
+  },
+  {
+    "parser": "gpt_oss",
+    "label": "no_channel",
+    "full": "plain content",
+    "deltas": [
+      "plain ",
+      "conten",
+      "t"
+    ],
+    "extract": {
+      "reasoning": null,
+      "content": "plain content"
+    },
+    "stream": [],
+    "finalize": null
+  },
+  {
+    "parser": "gpt_oss",
+    "label": "constrain",
+    "full": "<|channel|>analysis<|message|>reason<|end|><|channel|>final <|constrain|>JSON<|message|>{\"a\":1}<|return|>",
+    "deltas": [
+      "<|chan",
+      "nel|>a",
+      "nalysi",
+      "s<|mes",
+      "sage|>",
+      "reason",
+      "<|end|",
+      "><|cha",
+      "nnel|>",
+      "final ",
+      "<|cons",
+      "train|",
+      ">JSON<",
+      "|messa",
+      "ge|>{\"",
+      "a\":1}<",
+      "|retur",
+      "n|>"
+    ],
+    "extract": {
+      "reasoning": "reason",
+      "content": "{\"a\":1}"
+    },
+    "stream": [
+      {
+        "reasoning": "reason",
+        "content": null
+      },
+      {
+        "reasoning": "<|end|",
+        "content": null
+      },
+      {
+        "reasoning": null,
+        "content": "{\""
+      },
+      {
+        "reasoning": null,
+        "content": "a\":1}<"
+      },
+      {
+        "reasoning": null,
+        "content": "|retur"
+      },
+      {
+        "reasoning": null,
+        "content": "n|>"
+      }
+    ],
+    "finalize": null
+  },
+  {
+    "parser": "gpt_oss",
+    "label": "stream",
+    "full": "<|channel|>analysis<|message|>think<|channel|>final<|message|>answer<|return|>",
+    "deltas": [
+      "<|channel|>analysis<|message|>",
+      "think",
+      "<|channel|>final<|message|>",
+      "answer",
+      "<|return|>"
+    ],
+    "extract": {
+      "reasoning": "think",
+      "content": "answer"
+    },
+    "stream": [
+      {
+        "reasoning": "think",
+        "content": null
+      },
+      {
+        "reasoning": null,
+        "content": "answer"
+      }
+    ],
+    "finalize": null
+  },
+  {
+    "parser": "harmony",
+    "label": "analysis_final_return",
+    "full": "<|channel|>analysis<|message|>Thinking...<|end|><|channel|>final<|message|>Result.<|return|>",
+    "deltas": [
+      "<|chan",
+      "nel|>a",
+      "nalysi",
+      "s<|mes",
+      "sage|>",
+      "Thinki",
+      "ng...<",
+      "|end|>",
+      "<|chan",
+      "nel|>f",
+      "inal<|",
+      "messag",
+      "e|>Res",
+      "ult.<|",
+      "return",
+      "|>"
+    ],
+    "extract": {
+      "reasoning": "Thinking...",
+      "content": "Result."
+    },
+    "stream": [],
+    "finalize": null
+  },
+  {
+    "parser": "harmony",
+    "label": "final_end_terminator",
+    "full": "<|channel|>analysis<|message|>t<|end|><|channel|>final<|message|>answer<|end|>",
+    "deltas": [
+      "<|chan",
+      "nel|>a",
+      "nalysi",
+      "s<|mes",
+      "sage|>",
+      "t<|end",
+      "|><|ch",
+      "annel|",
+      ">final",
+      "<|mess",
+      "age|>a",
+      "nswer<",
+      "|end|>"
+    ],
+    "extract": {
+      "reasoning": "t",
+      "content": "answer"
+    },
+    "stream": [],
+    "finalize": null
+  },
+  {
+    "parser": "harmony",
+    "label": "no_final",
+    "full": "<|channel|>analysis<|message|>just reasoning<|end|>",
+    "deltas": [
+      "<|chan",
+      "nel|>a",
+      "nalysi",
+      "s<|mes",
+      "sage|>",
+      "just r",
+      "easoni",
+      "ng<|en",
+      "d|>"
+    ],
+    "extract": {
+      "reasoning": "just reasoning",
+      "content": null
+    },
+    "stream": [],
+    "finalize": null
+  },
+  {
+    "parser": "harmony",
+    "label": "stream",
+    "full": "<|channel|>analysis<|message|>think<|end|><|channel|>final<|message|>answer<|return|>",
+    "deltas": [
+      "<|channel|>",
+      "analysis",
+      "<|message|>",
+      "think",
+      "<|end|>",
+      "<|channel|>",
+      "final",
+      "<|message|>",
+      "answer",
+      "<|return|>"
+    ],
+    "extract": {
+      "reasoning": "think",
+      "content": "answer"
+    },
+    "stream": [
+      {
+        "reasoning": "think",
+        "content": null
+      },
+      {
+        "reasoning": "answer",
+        "content": null
+      }
+    ],
+    "finalize": null
+  },
+  {
+    "parser": "minimax",
+    "label": "explicit_think",
+    "full": "<think>let me reason</think>the answer",
+    "deltas": [
+      "<think",
+      ">let m",
+      "e reas",
+      "on</th",
+      "ink>th",
+      "e answ",
+      "er"
+    ],
+    "extract": {
+      "reasoning": "let me reason",
+      "content": "the answer"
+    },
+    "stream": [],
+    "finalize": {
+      "reasoning": null,
+      "content": "<think>let me reason</think>the answer"
+    }
+  },
+  {
+    "parser": "minimax",
+    "label": "reasoning_preamble",
+    "full": "The user asks for help.\n\nThe answer is 42 and more text here.",
+    "deltas": [
+      "The us",
+      "er ask",
+      "s for ",
+      "help.\n",
+      "\nThe a",
+      "nswer ",
+      "is 42 ",
+      "and mo",
+      "re tex",
+      "t here",
+      "."
+    ],
+    "extract": {
+      "reasoning": "The user asks for help.",
+      "content": "The answer is 42 and more text here."
+    },
+    "stream": [],
+    "finalize": {
+      "reasoning": null,
+      "content": "The user asks for help.\n\nThe answer is 42 and more text here."
+    }
+  },
+  {
+    "parser": "minimax",
+    "label": "direct_content",
+    "full": "```python\nprint(1)\n```",
+    "deltas": [
+      "```pyt",
+      "hon\npr",
+      "int(1)",
+      "\n```"
+    ],
+    "extract": {
+      "reasoning": null,
+      "content": "```python\nprint(1)\n```"
+    },
+    "stream": [
+      {
+        "reasoning": null,
+        "content": "```pyt"
+      },
+      {
+        "reasoning": null,
+        "content": "hon\npr"
+      },
+      {
+        "reasoning": null,
+        "content": "int(1)"
+      },
+      {
+        "reasoning": null,
+        "content": "\n```"
+      }
+    ],
+    "finalize": null
+  },
+  {
+    "parser": "minimax",
+    "label": "plain_no_reasoning",
+    "full": "Hello, how can I help you today with your request?",
+    "deltas": [
+      "Hello,",
+      " how c",
+      "an I h",
+      "elp yo",
+      "u toda",
+      "y with",
+      " your ",
+      "reques",
+      "t?"
+    ],
+    "extract": {
+      "reasoning": null,
+      "content": "Hello, how can I help you today with your request?"
+    },
+    "stream": [],
+    "finalize": {
+      "reasoning": null,
+      "content": "Hello, how can I help you today with your request?"
+    }
+  },
+  {
+    "parser": "minimax",
+    "label": "stream_reasoning",
+    "full": "I need to think about this carefully.\n\nThe answer is yes, definitely so here.",
+    "deltas": [
+      "I need",
+      " to th",
+      "ink ab",
+      "out th",
+      "is car",
+      "efully",
+      ".\n\nThe",
+      " answe",
+      "r is y",
+      "es, de",
+      "finite",
+      "ly so ",
+      "here."
+    ],
+    "extract": {
+      "reasoning": "I need to think about this carefully.",
+      "content": "The answer is yes, definitely so here."
+    },
+    "stream": [],
+    "finalize": {
+      "reasoning": null,
+      "content": "I need to think about this carefully.\n\nThe answer is yes, definitely so here."
+    }
+  },
+  {
+    "parser": "minimax",
+    "label": "stream_direct",
+    "full": "```code block here```",
+    "deltas": [
+      "```cod",
+      "e bloc",
+      "k here",
+      "```"
+    ],
+    "extract": {
+      "reasoning": null,
+      "content": "```code block here```"
+    },
+    "stream": [
+      {
+        "reasoning": null,
+        "content": "```cod"
+      },
+      {
+        "reasoning": null,
+        "content": "e bloc"
+      },
+      {
+        "reasoning": null,
+        "content": "k here"
+      },
+      {
+        "reasoning": null,
+        "content": "```"
+      }
+    ],
+    "finalize": null
+  }
+]
