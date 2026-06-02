@@ -137,6 +137,16 @@ func strNil(s string) *string {
 // strip trims surrounding whitespace.
 func strip(s string) string { return strings.TrimSpace(s) }
 
+// replaceFirst removes the first match of re from s, mirroring Python's
+// re.sub(..., count=1).
+func replaceFirst(re *regexp.Regexp, s string) string {
+	loc := re.FindStringIndex(s)
+	if loc == nil {
+		return s
+	}
+	return s[:loc[0]] + s[loc[1]:]
+}
+
 const typeFunction = "function"
 
 // pyStr mirrors Python's str() for the scalar values that show up in tool
