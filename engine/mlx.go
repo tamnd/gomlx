@@ -7,19 +7,20 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"sync"
+	"strconv"
 
 	"github.com/tamnd/gomlx/compute"
 	"github.com/tamnd/gomlx/tokenizer"
 )
 
 // MLXEngine is the GPU-backed Engine. It loads a Qwen3 checkpoint and runs the
-// pure-Go forward pass over MLX. Generation is serialized with a mutex: the
-// device runs one request at a time, and the scheduler layers batching on top.
+// pure-Go forward pass over MLX. Concurrent requests are not serialized: they
+// are handed to a Runner that batches them into a single forward pass per step,
+// so throughput under load scales with the batch instead of the queue depth.
 type MLXEngine struct {
 	name string
-	gen  *compute.Generator
-	mu   sync.Mutex
+	tok  *tokenizer.Tokenizer
+	run  *compute.Runner
 }
 
 // NewMLXEngine loads the model, tokenizer, and config from a directory laid out
@@ -55,10 +56,25 @@ func NewMLXEngine(name, dir string) (*MLXEngine, error) {
 	if name == "" {
 		name = filepath.Base(dir)
 	}
-	return &MLXEngine{
-		name: name,
-		gen:  &compute.Generator{Model: model, Tok: tok, EOS: qwen3EOS},
-	}, nil
+	runner := &compute.Runner{
+		Model:    model,
+		Tok:      tok,
+		EOS:      qwen3EOS,
+		MaxBatch: maxBatch(),
+	}
+	runner.Start()
+	return &MLXEngine{name: name, tok: tok, run: runner}, nil
+}
+
+// maxBatch reads the decode batch limit from GOMLX_MAX_BATCH, defaulting to 8.
+// It caps how many concurrent requests share one forward pass.
+func maxBatch() int {
+	if v := os.Getenv("GOMLX_MAX_BATCH"); v != "" {
+		if n, err := strconv.Atoi(v); err == nil && n > 0 {
+			return n
+		}
+	}
+	return 8
 }
 
 // qwen3EOS lists the token ids that end a Qwen3 turn: <|endoftext|> and
@@ -72,7 +88,7 @@ func (e *MLXEngine) Stop(context.Context) error  { return nil }
 
 // EstimateNewTokens encodes the prompt to count tokens exactly.
 func (e *MLXEngine) EstimateNewTokens(prompt string) (int, int) {
-	n := len(e.gen.Tok.Encode(prompt))
+	n := len(e.tok.Encode(prompt))
 	return n, n
 }
 
@@ -98,9 +114,7 @@ func genConfig(ctx context.Context, p SamplingParams, onToken func(string)) comp
 }
 
 func (e *MLXEngine) Generate(ctx context.Context, prompt string, p SamplingParams) (GenerationOutput, error) {
-	e.mu.Lock()
-	defer e.mu.Unlock()
-	res, err := e.gen.Generate(prompt, genConfig(ctx, p, nil))
+	res, err := e.run.Generate(prompt, genConfig(ctx, p, nil))
 	if err != nil {
 		return GenerationOutput{}, err
 	}
@@ -119,8 +133,6 @@ func (e *MLXEngine) StreamGenerate(ctx context.Context, prompt string, p Samplin
 	ch := make(chan GenerationOutput)
 	go func() {
 		defer close(ch)
-		e.mu.Lock()
-		defer e.mu.Unlock()
 
 		emit := func(delta string) {
 			select {
@@ -128,7 +140,7 @@ func (e *MLXEngine) StreamGenerate(ctx context.Context, prompt string, p Samplin
 			case ch <- GenerationOutput{NewText: delta, Channel: ChannelContent}:
 			}
 		}
-		res, err := e.gen.Generate(prompt, genConfig(ctx, p, emit))
+		res, err := e.run.Generate(prompt, genConfig(ctx, p, emit))
 		if err != nil {
 			return
 		}

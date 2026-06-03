@@ -82,6 +82,7 @@ func TestMLXEngineCancel(t *testing.T) {
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	p := DefaultSamplingParams()
 	p.MaxTokens = 256
 	p.Temperature = 0
