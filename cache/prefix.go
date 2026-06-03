@@ -39,10 +39,18 @@ type block struct {
 // from the single scheduler goroutine, the same goroutine that owns the device.
 type PrefixCache struct {
 	blockSize int
-	capacity  int // maximum resident blocks; <= 0 disables eviction
+	capacity  int // maximum resident blocks; <= 0 disables count-based eviction
 	nextID    Handle
 	blocks    map[uint64]*block
 	lru       *list.List // *block, front = most recently used
+
+	// Optional memory-aware eviction. When byteLimit is positive a block is
+	// charged blockBytes of key/value state and the cache evicts to keep the
+	// resident total at or below the limit, on top of any count capacity. This
+	// lets the cache hold as many blocks as fit a memory budget rather than a
+	// fixed count, which matters because block cost varies by model.
+	blockBytes int64
+	byteLimit  int64
 
 	hits   uint64
 	misses uint64
@@ -68,6 +76,10 @@ func (c *PrefixCache) BlockSize() int { return c.blockSize }
 
 // Len reports how many blocks are currently resident.
 func (c *PrefixCache) Len() int { return len(c.blocks) }
+
+// UsageBytes reports the key/value memory the resident blocks occupy, or zero
+// when the cache is not tracking memory.
+func (c *PrefixCache) UsageBytes() int64 { return int64(len(c.blocks)) * c.blockBytes }
 
 // Match returns the longest cached prefix of tokens, expressed as the number of
 // matched tokens (always a multiple of the block size) and the handle of each
@@ -151,13 +163,11 @@ func (c *PrefixCache) Stats() (hits, misses uint64) { return c.hits, c.misses }
 // touch moves a block to the front of the LRU list.
 func (c *PrefixCache) touch(b *block) { c.lru.MoveToFront(b.elem) }
 
-// evict drops least-recently-used unpinned blocks until the cache is within
-// capacity. A capacity of zero or less disables eviction entirely.
+// evict drops least-recently-used unpinned blocks until the cache is within both
+// its block-count capacity and its memory budget. Either limit is disabled when
+// non-positive; if both are disabled nothing is evicted.
 func (c *PrefixCache) evict() {
-	if c.capacity <= 0 {
-		return
-	}
-	for len(c.blocks) > c.capacity {
+	for c.overLimit() {
 		e := c.lru.Back()
 		if e == nil {
 			return
@@ -175,6 +185,17 @@ func (c *PrefixCache) evict() {
 		c.lru.Remove(victim)
 		delete(c.blocks, b.hash)
 	}
+}
+
+// overLimit reports whether the resident set exceeds either active limit.
+func (c *PrefixCache) overLimit() bool {
+	if c.capacity > 0 && len(c.blocks) > c.capacity {
+		return true
+	}
+	if c.byteLimit > 0 && c.UsageBytes() > c.byteLimit {
+		return true
+	}
+	return false
 }
 
 // byHandle finds a resident block by its handle. The cache is small relative to
