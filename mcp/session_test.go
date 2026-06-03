@@ -4,78 +4,16 @@ package mcp
 
 import (
 	"context"
-	"encoding/json"
 	"net"
 	"slices"
 	"testing"
 	"time"
 )
 
-// startServer runs a scripted MCP server over a pipe end. A real server answers
-// requests, but this package's Conn is request-driven, so the fake server side is
-// built directly on the codec. It answers the three protocol methods a session
-// uses.
+// startServer runs the shared fake MCP server (see serveFakeMCP) over a pipe end.
 func startServer(t *testing.T, serverEnd net.Conn) {
 	t.Helper()
-	cdc := newCodec(serverEnd, serverEnd)
-	go func() {
-		for {
-			m, err := cdc.readMessage()
-			if err != nil {
-				return
-			}
-			if m.Method == "" {
-				continue // a response or unexpected message
-			}
-			if m.Method == "notifications/initialized" {
-				continue // notification, no reply
-			}
-			reply := map[string]any{"jsonrpc": "2.0", "id": json.RawMessage(m.ID)}
-			switch m.Method {
-			case "initialize":
-				reply["result"] = map[string]any{
-					"protocolVersion": ProtocolVersion,
-					"capabilities":    map[string]any{},
-					"serverInfo":      map[string]any{"name": "fake", "version": "1.0"},
-				}
-			case "tools/list":
-				reply["result"] = map[string]any{
-					"tools": []any{
-						map[string]any{
-							"name":        "read",
-							"description": "read a file",
-							"inputSchema": map[string]any{"type": "object"},
-						},
-						map[string]any{
-							"name":        "write",
-							"description": "write a file",
-						},
-					},
-				}
-			case "tools/call":
-				var p struct {
-					Name string `json:"name"`
-				}
-				_ = json.Unmarshal(m.Params, &p)
-				if p.Name == "boom" {
-					reply["result"] = map[string]any{
-						"content": []any{map[string]any{"type": "text", "text": "it failed"}},
-						"isError": true,
-					}
-				} else {
-					reply["result"] = map[string]any{
-						"content": []any{
-							map[string]any{"type": "text", "text": "line one"},
-							map[string]any{"type": "text", "text": "line two"},
-						},
-					}
-				}
-			default:
-				reply["error"] = map[string]any{"code": -32601, "message": "method not found"}
-			}
-			_ = cdc.writeValue(reply)
-		}
-	}()
+	go serveFakeMCP(serverEnd, serverEnd)
 }
 
 func newSession(t *testing.T) *Session {
