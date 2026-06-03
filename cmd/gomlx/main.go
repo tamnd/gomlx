@@ -100,18 +100,33 @@ func runServe(args []string) {
 	fmt.Printf("  is_hybrid:        %v\n", det.IsHybrid)
 	fmt.Printf("  spec_decode:      %v\n", det.SupportsSpecDecode)
 
-	// The MLX compute backend lands in stage 4. Until then, serve with the
-	// mock backend so the full HTTP path runs and is benchmarkable.
+	// The mock backend exercises the full HTTP path with no GPU. The real path
+	// loads a local model directory through the MLX engine, which needs a binary
+	// built with the mlx tag and an MLX runtime.
 	var eng engine.Engine
+	backend := "mock backend"
 	if cfg.Mock {
 		eng = engine.NewMockEngine(cfg.Model)
 	} else {
-		fmt.Fprintln(os.Stderr, "\ncompute backend not yet wired (stage 4); use --mock to run the serving layer")
-		os.Exit(1)
+		dir := cfg.Model
+		if fi, err := os.Stat(dir); err != nil || !fi.IsDir() {
+			fmt.Fprintf(os.Stderr, "\ngomlx serve: %q is not a local model directory.\n"+
+				"Pass a directory holding config.json, tokenizer.json, and model.safetensors,\n"+
+				"or use --mock to run the serving layer without a model.\n", cfg.Model)
+			os.Exit(1)
+		}
+		mlxEng, err := engine.NewMLXEngine(cfg.Model, dir)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "\ngomlx serve: %v\n"+
+				"Build with -tags mlx and an MLX runtime, or use --mock.\n", err)
+			os.Exit(1)
+		}
+		eng = mlxEng
+		backend = "mlx backend"
 	}
 
 	app := server.New(cfg, eng)
-	fmt.Printf("  listen:           http://%s (mock backend)\n\n", app.Addr())
+	fmt.Printf("  listen:           http://%s (%s)\n\n", app.Addr(), backend)
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
