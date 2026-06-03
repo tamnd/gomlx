@@ -44,6 +44,17 @@ static int gomlx_sdpa(mlx_array* res, mlx_array q, mlx_array k, mlx_array v,
     mlx_vector_array_free(no_mask);
     return rc;
 }
+
+// sdpa_mask wraps the fused attention with an explicit additive mask array. The
+// mask is added to the attention scores before softmax, so padding positions
+// carry a large negative value and contribute nothing.
+static int gomlx_sdpa_mask(mlx_array* res, mlx_array q, mlx_array k, mlx_array v,
+                           float scale, mlx_array mask, mlx_stream s) {
+    mlx_vector_array mv = mlx_vector_array_new_value(mask);
+    int rc = mlx_fast_scaled_dot_product_attention(res, q, k, v, scale, "array", mv, s);
+    mlx_vector_array_free(mv);
+    return rc;
+}
 */
 import "C"
 
@@ -85,6 +96,22 @@ func dtypeC(dt DType) C.mlx_dtype {
 
 // arrayHandle recovers the C handle stored in an Array.
 func arrayHandle(a Array) C.mlx_array { return *(*C.mlx_array)(a.ptr) }
+
+// DType reports the element type of the array.
+func (a Array) DType() DType {
+	switch C.mlx_array_dtype(arrayHandle(a)) {
+	case C.MLX_FLOAT16:
+		return F16
+	case C.MLX_BFLOAT16:
+		return BF16
+	case C.MLX_UINT32:
+		return U32
+	case C.MLX_INT32:
+		return I32
+	default:
+		return F32
+	}
+}
 
 // handleShape reads the true shape of an mlx array. mlx computes shapes eagerly
 // even when values are lazy, so this is valid before evaluation.
@@ -357,6 +384,21 @@ func SDPA(q, k, v Array, scale float32, causal bool) (Array, error) {
 	var res C.mlx_array
 	rc := C.gomlx_sdpa(&res, arrayHandle(q), arrayHandle(k), arrayHandle(v), C.float(scale), mode, gpuStream)
 	if err := check(rc, "sdpa"); err != nil {
+		return Array{}, err
+	}
+	return wrap(res), nil
+}
+
+// SDPAMasked runs fused scaled dot-product attention with an explicit additive
+// mask. The mask must broadcast to [batch, heads, q_len, k_len]; valid
+// positions are 0 and masked positions a large negative value. This is the
+// batched-decode path, where sequences in the batch share a padded KV cache and
+// the mask hides each sequence's padding.
+func SDPAMasked(q, k, v, mask Array, scale float32) (Array, error) {
+	var res C.mlx_array
+	rc := C.gomlx_sdpa_mask(&res, arrayHandle(q), arrayHandle(k), arrayHandle(v),
+		C.float(scale), arrayHandle(mask), gpuStream)
+	if err := check(rc, "sdpa_mask"); err != nil {
 		return Array{}, err
 	}
 	return wrap(res), nil
