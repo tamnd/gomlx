@@ -29,7 +29,7 @@ type BatchCache struct {
 // projection and MLP matmuls into batched matmuls and lifts throughput far
 // above serialized single-stream decode.
 type Batch struct {
-	m      *Qwen3Model
+	m      *DenseModel
 	caches []BatchCache
 
 	n    int   // number of sequences
@@ -40,7 +40,7 @@ type Batch struct {
 }
 
 // NewBatch prepares an empty batch state for n sequences.
-func (m *Qwen3Model) NewBatch(n int) *Batch {
+func (m *DenseModel) NewBatch(n int) *Batch {
 	return &Batch{m: m, caches: make([]BatchCache, len(m.Layers)), n: n}
 }
 
@@ -144,7 +144,7 @@ func (b *Batch) embed(ids []int32, n, q int) (mlxgo.Array, error) {
 // block runs one transformer layer over a batch. q is the query length (the
 // padded prompt length on prefill, 1 on decode); offset is the rotary phase for
 // the new tokens; mask is the additive attention mask.
-func (b *Batch) block(h mlxgo.Array, l *Qwen3Layer, c *BatchCache, q, offset int, mask mlxgo.Array) (mlxgo.Array, error) {
+func (b *Batch) block(h mlxgo.Array, l *DenseLayer, c *BatchCache, q, offset int, mask mlxgo.Array) (mlxgo.Array, error) {
 	a := b.m.Args
 	eps := float32(a.RMSNormEps)
 	n := b.n
@@ -176,11 +176,15 @@ func (b *Batch) block(h mlxgo.Array, l *Qwen3Layer, c *BatchCache, q, offset int
 		return mlxgo.Array{}, err
 	}
 
-	if qp, err = mlxgo.RMSNorm(qp, l.QNorm, eps); err != nil {
-		return mlxgo.Array{}, err
-	}
-	if kp, err = mlxgo.RMSNorm(kp, l.KNorm, eps); err != nil {
-		return mlxgo.Array{}, err
+	// Qwen3 norms the query and key per head before RoPE; Llama and Mistral do
+	// not.
+	if a.QKNorm {
+		if qp, err = mlxgo.RMSNorm(qp, l.QNorm, eps); err != nil {
+			return mlxgo.Array{}, err
+		}
+		if kp, err = mlxgo.RMSNorm(kp, l.KNorm, eps); err != nil {
+			return mlxgo.Array{}, err
+		}
 	}
 
 	base := float32(a.RopeTheta)

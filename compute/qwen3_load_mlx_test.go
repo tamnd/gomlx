@@ -87,7 +87,7 @@ func TestNewQwen3ModelFromBytes(t *testing.T) {
 		inter  = 16
 		layers = 2
 	)
-	args := Qwen3Args{
+	args := DenseArgs{
 		HiddenSize:        hidden,
 		IntermediateSize:  inter,
 		NumHiddenLayers:   layers,

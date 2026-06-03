@@ -12,7 +12,7 @@ import (
 	"github.com/tamnd/gomlx/tokenizer"
 )
 
-func loadModel(t *testing.T, dir string) (*Qwen3Model, *tokenizer.Tokenizer) {
+func loadModel(t *testing.T, dir string) (*DenseModel, *tokenizer.Tokenizer) {
 	t.Helper()
 	cfgRaw, err := os.ReadFile(filepath.Join(dir, "config.json"))
 	if err != nil {
@@ -50,7 +50,7 @@ func argmaxRow(logits []float32, row, vocab int) int32 {
 
 // greedySingle decodes steps tokens one sequence at a time through the
 // single-stream forward pass, the reference the batched path must match.
-func greedySingle(t *testing.T, m *Qwen3Model, prompt []int32, steps, vocab int) []int32 {
+func greedySingle(t *testing.T, m *DenseModel, prompt []int32, steps, vocab int) []int32 {
 	t.Helper()
 	caches := m.NewCaches()
 	out := make([]int32, 0, steps)
@@ -75,7 +75,7 @@ func greedySingle(t *testing.T, m *Qwen3Model, prompt []int32, steps, vocab int)
 
 // greedyBatch decodes steps tokens for all prompts together through the batched
 // path, feeding back the per-sequence argmax each step.
-func greedyBatch(t *testing.T, m *Qwen3Model, prompts [][]int32, steps, vocab int) [][]int32 {
+func greedyBatch(t *testing.T, m *DenseModel, prompts [][]int32, steps, vocab int) [][]int32 {
 	t.Helper()
 	b := m.NewBatch(len(prompts))
 	logits, err := b.Prefill(prompts)

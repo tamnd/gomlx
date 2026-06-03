@@ -60,7 +60,9 @@ func TestQwen3ForwardSmoke(t *testing.T) {
 		inter  = 16
 		layers = 2
 	)
-	args := Qwen3Args{
+	args := DenseArgs{
+		Arch:              "qwen3",
+		QKNorm:            true,
 		HiddenSize:        hidden,
 		IntermediateSize:  inter,
 		NumHiddenLayers:   layers,
@@ -71,12 +73,12 @@ func TestQwen3ForwardSmoke(t *testing.T) {
 		RopeTheta:         1000000,
 		VocabSize:         vocab,
 	}
-	m := &Qwen3Model{Args: args}
+	m := &DenseModel{Args: args}
 	m.Embed = arr(t, vocab, hidden)
 	m.Norm = ones(t, hidden)
 	m.LMHead = arr(t, vocab, hidden)
 	for range layers {
-		m.Layers = append(m.Layers, Qwen3Layer{
+		m.Layers = append(m.Layers, DenseLayer{
 			InputNorm:    ones(t, hidden),
 			QProj:        arr(t, heads*hd, hidden),
 			KProj:        arr(t, kv*hd, hidden),
