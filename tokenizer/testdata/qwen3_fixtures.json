@@ -1,0 +1,136 @@
+[
+{
+"text": "Hello, world!",
+"ids": [
+9707,
+11,
+1879,
+0
+],
+"decoded": "Hello, world!"
+},
+{
+"text": "The quick brown fox jumps over the lazy dog.",
+"ids": [
+785,
+3974,
+13876,
+38835,
+34208,
+916,
+279,
+15678,
+5562,
+13
+],
+"decoded": "The quick brown fox jumps over the lazy dog."
+},
+{
+"text": "def add(a, b):\n    return a + b\n",
+"ids": [
+750,
+912,
+2877,
+11,
+293,
+982,
+262,
+470,
+264,
+488,
+293,
+198
+],
+"decoded": "def add(a, b):\n    return a + b\n"
+},
+{
+"text": "  leading spaces and  multiple   spaces",
+"ids": [
+220,
+6388,
+12621,
+323,
+220,
+5248,
+256,
+12621
+],
+"decoded": "  leading spaces and  multiple   spaces"
+},
+{
+"text": "Numbers 12345 and 678",
+"ids": [
+27237,
+220,
+16,
+17,
+18,
+19,
+20,
+323,
+220,
+21,
+22,
+23
+],
+"decoded": "Numbers 12345 and 678"
+},
+{
+"text": "café naïve résumé",
+"ids": [
+924,
+58858,
+94880,
+586,
+9333,
+1242,
+963
+],
+"decoded": "café naïve résumé"
+},
+{
+"text": "<|im_start|>user\nHi<|im_end|>\n",
+"ids": [
+151644,
+872,
+198,
+13048,
+151645,
+198
+],
+"decoded": "user\nHi\n"
+},
+{
+"text": "你好，世界",
+"ids": [
+108386,
+3837,
+99489
+],
+"decoded": "你好，世界"
+},
+{
+"text": "Tabs\tand\nnewlines\r\nhere",
+"ids": [
+36985,
+52477,
+198,
+931,
+7969,
+319,
+6739
+],
+"decoded": "Tabs\tand\nnewlines\r\nhere"
+},
+{
+"text": "EMOJI 😀 test",
+"ids": [
+2716,
+46,
+45064,
+90316,
+1273
+],
+"decoded": "EMOJI 😀 test"
+}
+]
