@@ -11,9 +11,13 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"sort"
+	"strconv"
+	"strings"
 	"syscall"
 	"text/tabwriter"
 
+	"github.com/tamnd/gomlx/agents"
 	"github.com/tamnd/gomlx/bench"
 	"github.com/tamnd/gomlx/config"
 	"github.com/tamnd/gomlx/engine"
@@ -37,6 +41,8 @@ func main() {
 		runServe(args)
 	case "models":
 		runModels(args)
+	case "agents":
+		runAgents(args)
 	case "bench":
 		runBench(args)
 	case "version", "--version", "-v":
@@ -60,6 +66,7 @@ Commands:
   serve     Start the inference server
   bench     Load-test an OpenAI-compatible endpoint
   models    List available model aliases
+  agents    List agent profiles or show how to point one at the server
   version   Show version
   help      Show this help
 
@@ -214,6 +221,95 @@ func runModels(args []string) {
 			p.Alias, p.HFPath, orNone(p.ToolCallParser), orNone(p.ReasoningParser), p.IsHybrid, p.IsMoE)
 	}
 	_ = w.Flush()
+}
+
+func runAgents(args []string) {
+	fs := flag.NewFlagSet("agents", flag.ExitOnError)
+	url := fs.String("url", "http://127.0.0.1:8000/v1", "base URL the agent should point at")
+	model := fs.String("model", "", "model id to write into the config (default: the profile's first recommended)")
+	agentVersion := fs.String("agent-version", "", "agent version to match version-specific config")
+	_ = fs.Parse(args)
+
+	// With no name, list the profiles. With a name, show how to configure it.
+	if fs.NArg() == 0 {
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+		fmt.Fprintln(w, "NAME\tAGENT\tSTARS\tPARSER\tCONFIG\tRECOMMENDED")
+		for _, p := range agents.List() {
+			fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%d models\n",
+				p.Name, p.DisplayName, orStars(p.Stars), orNone(p.ParserOverride), p.Config.Type, len(p.RecommendedModels))
+		}
+		_ = w.Flush()
+		return
+	}
+
+	name := fs.Arg(0)
+	p, ok := agents.Get(name)
+	if !ok {
+		fmt.Fprintf(os.Stderr, "gomlx agents: unknown agent %q; run \"gomlx agents\" to list them\n", name)
+		os.Exit(1)
+	}
+
+	modelID := *model
+	if modelID == "" {
+		if len(p.RecommendedModels) > 0 {
+			modelID = p.RecommendedModels[0]
+		} else {
+			modelID = "<model>"
+		}
+	}
+
+	fmt.Printf("%s (%s)\n", p.DisplayName, p.Name)
+	if p.Repo != "" {
+		fmt.Printf("  repo:        %s\n", p.Repo)
+	}
+	fmt.Printf("  parser:      %s\n", orNone(p.ParserOverride))
+	if len(p.RecommendedModels) > 0 {
+		fmt.Printf("  recommended: %s\n", strings.Join(p.RecommendedModels, ", "))
+	}
+
+	rc := p.RenderConfig(*url, modelID, *agentVersion)
+	fmt.Printf("\nPoint %s at gomlx with this %s config:\n\n", p.DisplayName, rc.Type)
+	if rc.Type == "env" {
+		keys := make([]string, 0, len(rc.EnvVars))
+		for k := range rc.EnvVars {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		for _, k := range keys {
+			fmt.Printf("  export %s=%s\n", k, rc.EnvVars[k])
+		}
+	} else {
+		dest := p.Config.Path
+		if dest != "" {
+			fmt.Printf("  # write to %s\n", dest)
+		}
+		fmt.Println(indent(rc.Content, "  "))
+	}
+
+	if len(p.KnownIssues) > 0 {
+		fmt.Println("\nKnown issues:")
+		for _, issue := range p.KnownIssues {
+			fmt.Printf("  - %s\n", issue)
+		}
+	}
+}
+
+// indent prefixes every non-empty line of s with prefix.
+func indent(s, prefix string) string {
+	lines := strings.Split(s, "\n")
+	for i, line := range lines {
+		if line != "" {
+			lines[i] = prefix + line
+		}
+	}
+	return strings.Join(lines, "\n")
+}
+
+func orStars(n int) string {
+	if n <= 0 {
+		return "-"
+	}
+	return strconv.Itoa(n)
 }
 
 func orNone(s string) string {

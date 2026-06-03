@@ -1,0 +1,517 @@
+{
+  "aider": {
+    "capabilities": {
+      "function_calling": false,
+      "reasoning": false,
+      "streaming": true,
+      "vision": true
+    },
+    "config": {
+      "env_vars": {
+        "OPENAI_API_BASE": "{base_url}",
+        "OPENAI_API_KEY": "not-needed"
+      },
+      "type": "env"
+    },
+    "display_name": "Aider",
+    "known_issues": [
+      "Does NOT use function calling - uses text edit formats (unified diff, search/replace)",
+      "Best local model support of any agent - works with virtually any model",
+      "Architect mode: dual model (one plans, one edits) - use --architect flag",
+      "Voice-to-code via Whisper"
+    ],
+    "models": {
+      "parser_override": null,
+      "recommended": [
+        "qwen3.5-9b",
+        "qwen3.6-35b",
+        "qwen3.5-4b",
+        "deepseek-r1-8b"
+      ]
+    },
+    "name": "aider",
+    "repo": "Aider-AI/aider",
+    "stars": 43000,
+    "streaming": {
+      "extra_tool_tags": [],
+      "max_tools": 0,
+      "suppress_patterns": []
+    },
+    "testing": {
+      "binary": null,
+      "install_cmd": "pip install aider-chat",
+      "query_cmd": "aider --message '{query}' --yes --no-git",
+      "query_timeout": 180
+    }
+  },
+  "cline": {
+    "capabilities": {
+      "function_calling": false,
+      "reasoning": false,
+      "streaming": true,
+      "vision": true
+    },
+    "config": {
+      "env_vars": {
+        "OPENAI_API_KEY": "not-needed",
+        "OPENAI_BASE_URL": "{base_url}"
+      },
+      "type": "env"
+    },
+    "display_name": "Cline",
+    "known_issues": [
+      "VS Code extension - no CLI mode for automated testing",
+      "Uses XML text parsing for tools, not OpenAI function calling",
+      "Multimodal: sends screenshots as images for browser interaction",
+      "Ollama SSH tunnel disconnects (issue #10147)",
+      "Small models struggle with the XML tool format"
+    ],
+    "models": {
+      "parser_override": null,
+      "recommended": [
+        "qwen3.5-9b",
+        "qwen3.6-35b",
+        "gemma-4-26b"
+      ]
+    },
+    "name": "cline",
+    "repo": "cline/cline",
+    "stars": 60000,
+    "streaming": {
+      "extra_tool_tags": [],
+      "max_tools": 0,
+      "suppress_patterns": []
+    },
+    "testing": {
+      "binary": null,
+      "install_cmd": "code --install-extension saoudrizwan.claude-dev",
+      "query_cmd": null,
+      "query_timeout": 120
+    }
+  },
+  "codex": {
+    "capabilities": {
+      "function_calling": true,
+      "reasoning": true,
+      "streaming": true,
+      "vision": false
+    },
+    "config": {
+      "path": "~/.codex/config.toml",
+      "template": "[profiles.gomlx]\nmodel = \"{model_id}\"\nprovider = \"openai\"\n\n[providers.openai]\nopenai_base_url = \"{base_url}\"\napi_key = \"not-needed\"\n",
+      "type": "toml"
+    },
+    "display_name": "Codex CLI",
+    "known_issues": [
+      "Uses OpenAI Responses API (/v1/responses), not Chat Completions - partial compatibility",
+      "openai_base_url exists in config but has bugs with non-OpenAI backends (issue #7152, #8240)",
+      "Sandbox execution via Landlock (Linux) or Seatbelt (macOS)",
+      "apply_patch tool for file edits",
+      "Model switching for local models requested (issue #8319, #17261)"
+    ],
+    "models": {
+      "parser_override": null,
+      "recommended": [
+        "qwen3.5-9b",
+        "qwen3.6-35b",
+        "qwen3.5-4b"
+      ]
+    },
+    "name": "codex",
+    "repo": "openai/codex",
+    "stars": 75000,
+    "streaming": {
+      "extra_tool_tags": [],
+      "max_tools": 10,
+      "suppress_patterns": []
+    },
+    "testing": {
+      "binary": null,
+      "install_cmd": "cargo install codex-cli",
+      "query_cmd": "codex '{query}'",
+      "query_timeout": 120
+    }
+  },
+  "generic": {
+    "capabilities": {
+      "function_calling": true,
+      "reasoning": false,
+      "streaming": true,
+      "vision": false
+    },
+    "config": {
+      "env_vars": {
+        "OPENAI_API_KEY": "not-needed",
+        "OPENAI_BASE_URL": "{base_url}",
+        "OPENAI_MODEL": "{model_id}"
+      },
+      "type": "env"
+    },
+    "display_name": "Generic OpenAI Agent",
+    "known_issues": [],
+    "models": {
+      "recommended": [
+        "qwen3.5-4b",
+        "qwen3.5-9b",
+        "qwen3.6-35b"
+      ]
+    },
+    "name": "generic",
+    "streaming": {
+      "extra_tool_tags": [],
+      "max_tools": 10,
+      "suppress_patterns": []
+    },
+    "testing": {
+      "query_timeout": 120
+    }
+  },
+  "goose": {
+    "capabilities": {
+      "function_calling": true,
+      "reasoning": false,
+      "streaming": true,
+      "vision": false
+    },
+    "config": {
+      "env_vars": {
+        "GOOSE_PROVIDER": "ollama",
+        "OLLAMA_HOST": "{base_url_no_v1}"
+      },
+      "type": "env"
+    },
+    "display_name": "Goose",
+    "known_issues": [
+      "30s timeout on complex multi-step tasks - increase with GOOSE_TIMEOUT",
+      "Goose has 600s model loading timeout with exponential backoff for Ollama",
+      "MCP-first architecture: most tools come from MCP extensions"
+    ],
+    "models": {
+      "parser_override": null,
+      "recommended": [
+        "qwen3.5-9b",
+        "qwen3.6-35b",
+        "qwen3.5-4b"
+      ]
+    },
+    "name": "goose",
+    "repo": "block/goose",
+    "stars": 41000,
+    "streaming": {
+      "extra_tool_tags": [],
+      "max_tools": 20,
+      "suppress_patterns": []
+    },
+    "testing": {
+      "binary": null,
+      "install_cmd": "cargo install goose-cli",
+      "query_cmd": "goose run '{query}'",
+      "query_timeout": 180
+    }
+  },
+  "hermes": {
+    "capabilities": {
+      "function_calling": true,
+      "reasoning": true,
+      "streaming": true,
+      "vision": false
+    },
+    "config": {
+      "path": "~/.hermes/config.yaml",
+      "template": "model:\n  provider: \"custom\"\n  default: \"{model_id}\"\n  base_url: \"{base_url}\"\n  context_length: 32768\n  max_tokens: 4096\nplatform_toolsets:\n  cli: [terminal, file, code_execution, web, browser, skills]\n",
+      "type": "yaml"
+    },
+    "display_name": "Hermes Agent",
+    "known_issues": [
+      "todo tool conflict: Hermes injects a 'todo' tool that causes errors with Gemma 4. Fix: exclude from platform_toolsets or use -t flag",
+      "Gemma 4 [Calling tool mimicry: after many tool turns, Gemma 4 parrots Hermes UI text.",
+      "pip install hermes-agent may not work on all systems - clone and install from source in a venv"
+    ],
+    "models": {
+      "parser_override": null,
+      "recommended": [
+        "qwen3.5-4b",
+        "qwen3.5-9b",
+        "gemma-4-26b",
+        "qwen3.5-35b-a3b",
+        "qwen3.6-35b"
+      ]
+    },
+    "name": "hermes",
+    "repo": "NousResearch/hermes-agent",
+    "stars": 64000,
+    "streaming": {
+      "extra_tool_tags": [
+        [
+          "[Calling tool",
+          "\n"
+        ]
+      ],
+      "max_tools": 62,
+      "suppress_patterns": []
+    },
+    "testing": {
+      "binary": "~/.hermes/venv/bin/hermes",
+      "install_cmd": "pip install hermes-agent",
+      "query_cmd": "hermes chat -q '{query}' -Q",
+      "query_timeout": 120,
+      "specific_tests": "test_hermes.py"
+    },
+    "versions": [
+      {
+        "notes": "v0.9+ added MCP support and new tool formats",
+        "range": ">=0.9"
+      },
+      {
+        "config": {
+          "path": "~/.hermes/config.yaml",
+          "template": "model:\n  provider: \"custom\"\n  default: \"{model_id}\"\n  base_url: \"{base_url}\"\n",
+          "type": "yaml"
+        },
+        "notes": "v0.8 uses older config format without platform_toolsets",
+        "range": ">=0.8,<0.9"
+      }
+    ]
+  },
+  "langchain": {
+    "capabilities": {
+      "function_calling": true,
+      "reasoning": false,
+      "streaming": true,
+      "vision": false
+    },
+    "config": {
+      "env_vars": {
+        "OPENAI_API_KEY": "not-needed",
+        "OPENAI_BASE_URL": "{base_url}"
+      },
+      "type": "env"
+    },
+    "display_name": "LangChain",
+    "known_issues": [
+      "with_structured_output() overrides max_tokens to None; thinking models burn budget"
+    ],
+    "models": {
+      "recommended": [
+        "qwen3.5-9b",
+        "qwen3.6-35b",
+        "qwen3.5-4b"
+      ]
+    },
+    "name": "langchain",
+    "repo": "langchain-ai/langchain",
+    "stars": 100000,
+    "streaming": {
+      "max_tools": 10
+    },
+    "testing": {
+      "install_cmd": "pip install langchain-openai",
+      "specific_tests": "test_langchain.py"
+    }
+  },
+  "openclaude": {
+    "capabilities": {
+      "function_calling": true,
+      "reasoning": true,
+      "streaming": true,
+      "vision": false
+    },
+    "config": {
+      "env_vars": {
+        "CLAUDE_CODE_USE_OPENAI": "1",
+        "OPENAI_API_KEY": "not-needed",
+        "OPENAI_BASE_URL": "{base_url}",
+        "OPENAI_MODEL": "{model_id}"
+      },
+      "type": "env"
+    },
+    "display_name": "OpenClaude",
+    "known_issues": [
+      "Requires CLAUDE_CODE_USE_OPENAI=1 to enable OpenAI-compatible mode",
+      "Agent routing: different agents can use different models via agentModels in settings.json",
+      "DuckDuckGo web search fallback for non-Claude models"
+    ],
+    "models": {
+      "parser_override": null,
+      "recommended": [
+        "qwen3.5-9b",
+        "qwen3.6-35b",
+        "qwen3.5-4b",
+        "gemma-4-26b"
+      ]
+    },
+    "name": "openclaude",
+    "repo": "Gitlawb/openclaude",
+    "stars": 21000,
+    "streaming": {
+      "extra_tool_tags": [],
+      "max_tools": 25,
+      "suppress_patterns": []
+    },
+    "testing": {
+      "binary": null,
+      "install_cmd": "npm install -g openclaude",
+      "query_cmd": null,
+      "query_timeout": 120
+    }
+  },
+  "opencode": {
+    "capabilities": {
+      "function_calling": true,
+      "reasoning": true,
+      "streaming": true,
+      "vision": false
+    },
+    "config": {
+      "path": "~/.config/opencode/opencode.json",
+      "template": "{\n  \"$schema\": \"https://opencode.ai/config.json\",\n  \"provider\": {\n    \"gomlx\": {\n      \"npm\": \"@ai-sdk/openai-compatible\",\n      \"name\": \"gomlx\",\n      \"options\": {\n        \"baseURL\": \"{base_url}\",\n        \"apiKey\": \"not-needed\"\n      },\n      \"models\": {\n        \"{model_id}\": {}\n      }\n    }\n  },\n  \"model\": \"gomlx/{model_id}\"\n}\n",
+      "type": "json"
+    },
+    "display_name": "OpenCode",
+    "known_issues": [
+      "Config schema may need updating across OpenCode versions - if this template doesn't load, run `opencode --help` and check `~/.config/opencode/opencode.json` against the docs at opencode.ai.",
+      "OpenCode is interactive-only (no headless query mode); --test in gomlx agents will skip the query check.",
+      "First run of OpenCode may prompt for an Anthropic API key - choose 'skip' since gomlx is providing the model via the openai-compat provider."
+    ],
+    "models": {
+      "parser_override": null,
+      "recommended": [
+        "qwen3-coder-30b",
+        "qwen3.5-9b",
+        "qwen3.6-35b",
+        "qwen3.5-4b"
+      ]
+    },
+    "name": "opencode",
+    "repo": "sst/opencode",
+    "stars": 16000,
+    "streaming": {
+      "extra_tool_tags": [],
+      "max_tools": 25,
+      "suppress_patterns": []
+    },
+    "testing": {
+      "binary": "opencode",
+      "install_cmd": "brew install sst/tap/opencode  # or: npm install -g opencode-ai",
+      "query_cmd": null,
+      "query_timeout": 120
+    }
+  },
+  "openhands": {
+    "capabilities": {
+      "function_calling": false,
+      "reasoning": false,
+      "streaming": true,
+      "vision": true
+    },
+    "config": {
+      "env_vars": {
+        "LLM_API_KEY": "not-needed",
+        "LLM_BASE_URL": "{base_url}",
+        "LLM_MODEL": "{model_id}"
+      },
+      "type": "env"
+    },
+    "display_name": "OpenHands",
+    "known_issues": [
+      "Requires Docker for sandbox execution",
+      "Uses text-based action format, not OpenAI function calling",
+      "Uses LiteLLM under the hood - supports LLM_BASE_URL",
+      "Small local models struggle with the complex action format",
+      "SWE-bench score 77.6% - research-grade agent"
+    ],
+    "models": {
+      "parser_override": null,
+      "recommended": [
+        "qwen3.5-9b",
+        "qwen3.6-35b",
+        "qwen3.5-4b"
+      ]
+    },
+    "name": "openhands",
+    "repo": "All-Hands-AI/OpenHands",
+    "stars": 71000,
+    "streaming": {
+      "extra_tool_tags": [],
+      "max_tools": 0,
+      "suppress_patterns": []
+    },
+    "testing": {
+      "binary": null,
+      "install_cmd": "pip install openhands",
+      "query_cmd": null,
+      "query_timeout": 300
+    }
+  },
+  "pydanticai": {
+    "capabilities": {
+      "function_calling": true,
+      "reasoning": false,
+      "streaming": true,
+      "vision": false
+    },
+    "config": {
+      "env_vars": {
+        "OPENAI_API_KEY": "not-needed",
+        "OPENAI_BASE_URL": "{base_url}"
+      },
+      "type": "env"
+    },
+    "display_name": "PydanticAI",
+    "known_issues": [
+      "Structured output with thinking models: token budget consumed by reasoning before JSON output",
+      "Multi-tool chain (3+4)*5: some models fail sequential tool calls"
+    ],
+    "models": {
+      "recommended": [
+        "qwen3.5-9b",
+        "qwen3.6-35b",
+        "qwen3.5-4b"
+      ]
+    },
+    "name": "pydanticai",
+    "repo": "pydantic/pydantic-ai",
+    "stars": 15000,
+    "streaming": {
+      "max_tools": 10
+    },
+    "testing": {
+      "install_cmd": "pip install pydantic-ai",
+      "specific_tests": "test_pydantic_ai_full.py"
+    }
+  },
+  "smolagents": {
+    "capabilities": {
+      "function_calling": true,
+      "reasoning": false,
+      "streaming": false,
+      "vision": false
+    },
+    "config": {
+      "env_vars": {
+        "OPENAI_API_KEY": "not-needed",
+        "OPENAI_BASE_URL": "{base_url}"
+      },
+      "type": "env"
+    },
+    "display_name": "smolagents",
+    "known_issues": [],
+    "models": {
+      "recommended": [
+        "qwen3.5-9b",
+        "qwen3.6-35b",
+        "qwen3.5-4b"
+      ]
+    },
+    "name": "smolagents",
+    "repo": "huggingface/smolagents",
+    "stars": 15000,
+    "streaming": {
+      "max_tools": 10
+    },
+    "testing": {
+      "install_cmd": "pip install smolagents",
+      "specific_tests": "test_smolagents_full.py"
+    }
+  }
+}
