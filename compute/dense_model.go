@@ -9,12 +9,13 @@ import (
 	"github.com/tamnd/gomlx/mlxgo"
 )
 
-// Qwen3Layer holds the weights of one transformer block. Names follow the
-// Hugging Face checkpoint: the four attention projections, the Qwen3 per-head
-// query and key norms, the two layer norms, and the three MLP projections. All
-// projection weights are stored as the checkpoint stores them, shaped
-// [out_features, in_features].
-type Qwen3Layer struct {
+// DenseLayer holds the weights of one transformer block. Names follow the
+// Hugging Face checkpoint: the four attention projections, the optional per-head
+// query and key norms (Qwen3 only), the two layer norms, and the three MLP
+// projections. All projection weights are stored as the checkpoint stores them,
+// shaped [out_features, in_features]. QNorm and KNorm are left as zero-value
+// arrays for architectures that do not use them.
+type DenseLayer struct {
 	InputNorm    mlxgo.Array
 	QProj        mlxgo.Array
 	KProj        mlxgo.Array
@@ -28,18 +29,87 @@ type Qwen3Layer struct {
 	Down         mlxgo.Array
 }
 
-// Qwen3Model is a loaded Qwen3 dense model ready to run forward passes.
-type Qwen3Model struct {
-	Args   Qwen3Args
+// DenseModel is a loaded dense decoder (Qwen3, Llama, or Mistral) ready to run
+// forward passes. The families share this one implementation; DenseArgs.QKNorm
+// selects the only structural difference in the attention.
+type DenseModel struct {
+	Args   DenseArgs
 	Embed  mlxgo.Array // [vocab, hidden]
-	Layers []Qwen3Layer
+	Layers []DenseLayer
 	Norm   mlxgo.Array // final norm [hidden]
 	LMHead mlxgo.Array // [vocab, hidden]; equals Embed when weights are tied
 	scale  float32     // attention scale 1/sqrt(head_dim)
 }
 
-// LayerCache holds the running key and value tensors for one layer across
-// decode steps. Both are shaped [1, n_kv_heads, seq, head_dim].
+// newDenseModel assembles a runnable model from a loaded safetensors file and a
+// parsed config. Weight names follow the Hugging Face checkpoint layout, which is
+// identical across these families. The per-head query/key norms are loaded only
+// when the architecture uses them. When the config ties the word embeddings, or
+// the checkpoint ships no separate lm_head, the embedding matrix doubles as the
+// output projection.
+func newDenseModel(st *SafeTensors, args DenseArgs) (*DenseModel, error) {
+	m := &DenseModel{Args: args}
+
+	var err error
+	if m.Embed, err = LoadArray(st, "model.embed_tokens.weight"); err != nil {
+		return nil, err
+	}
+	if m.Norm, err = LoadArray(st, "model.norm.weight"); err != nil {
+		return nil, err
+	}
+
+	if args.TieWordEmbeddings || !st.Has("lm_head.weight") {
+		m.LMHead = m.Embed
+	} else if m.LMHead, err = LoadArray(st, "lm_head.weight"); err != nil {
+		return nil, err
+	}
+
+	m.Layers = make([]DenseLayer, args.NumHiddenLayers)
+	for i := range m.Layers {
+		p := fmt.Sprintf("model.layers.%d.", i)
+		fields := []struct {
+			dst  *mlxgo.Array
+			name string
+		}{
+			{&m.Layers[i].InputNorm, p + "input_layernorm.weight"},
+			{&m.Layers[i].QProj, p + "self_attn.q_proj.weight"},
+			{&m.Layers[i].KProj, p + "self_attn.k_proj.weight"},
+			{&m.Layers[i].VProj, p + "self_attn.v_proj.weight"},
+			{&m.Layers[i].OProj, p + "self_attn.o_proj.weight"},
+			{&m.Layers[i].PostAttnNorm, p + "post_attention_layernorm.weight"},
+			{&m.Layers[i].Gate, p + "mlp.gate_proj.weight"},
+			{&m.Layers[i].Up, p + "mlp.up_proj.weight"},
+			{&m.Layers[i].Down, p + "mlp.down_proj.weight"},
+		}
+		for _, f := range fields {
+			if *f.dst, err = LoadArray(st, f.name); err != nil {
+				return nil, err
+			}
+		}
+		if args.QKNorm {
+			if m.Layers[i].QNorm, err = LoadArray(st, p+"self_attn.q_norm.weight"); err != nil {
+				return nil, err
+			}
+			if m.Layers[i].KNorm, err = LoadArray(st, p+"self_attn.k_norm.weight"); err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	m.SetScale()
+	return m, nil
+}
+
+// NewModel builds a runnable model from weights and parsed args, for any
+// supported dense architecture. The arch-specific entry points (NewQwen3Model,
+// NewLlamaModel) and this generic one all share the same loader; which weights
+// are read follows from args.QKNorm.
+func NewModel(st *SafeTensors, args DenseArgs) (*DenseModel, error) {
+	return newDenseModel(st, args)
+}
+
+// LayerCache holds the running key and value tensors for one layer across decode
+// steps. Both are shaped [1, n_kv_heads, seq, head_dim].
 type LayerCache struct {
 	K     mlxgo.Array
 	V     mlxgo.Array
@@ -47,13 +117,13 @@ type LayerCache struct {
 }
 
 // NewCaches returns an empty cache per layer.
-func (m *Qwen3Model) NewCaches() []LayerCache {
+func (m *DenseModel) NewCaches() []LayerCache {
 	return make([]LayerCache, len(m.Layers))
 }
 
-// SetScale fills the derived attention scale. NewQwen3Model calls it; it is
+// SetScale fills the derived attention scale. newDenseModel calls it; it is
 // exported only so a hand-built test model can set it too.
-func (m *Qwen3Model) SetScale() {
+func (m *DenseModel) SetScale() {
 	m.scale = float32(1.0 / math.Sqrt(float64(m.Args.HeadDim)))
 }
 
@@ -70,7 +140,7 @@ func linear(x, w mlxgo.Array) (mlxgo.Array, error) {
 // returns the logits for every position, shaped [seq, vocab], as float32.
 // offset is the number of positions already in the cache, which sets the RoPE
 // phase for the new tokens.
-func (m *Qwen3Model) Forward(tokens []int32, caches []LayerCache, offset int) (mlxgo.Array, error) {
+func (m *DenseModel) Forward(tokens []int32, caches []LayerCache, offset int) (mlxgo.Array, error) {
 	a := m.Args
 	seq := len(tokens)
 
@@ -111,7 +181,7 @@ func (m *Qwen3Model) Forward(tokens []int32, caches []LayerCache, offset int) (m
 }
 
 // block runs one transformer layer.
-func (m *Qwen3Model) block(h mlxgo.Array, l *Qwen3Layer, c *LayerCache, seq, offset int) (mlxgo.Array, error) {
+func (m *DenseModel) block(h mlxgo.Array, l *DenseLayer, c *LayerCache, seq, offset int) (mlxgo.Array, error) {
 	a := m.Args
 	eps := float32(a.RMSNormEps)
 
@@ -147,12 +217,15 @@ func (m *Qwen3Model) block(h mlxgo.Array, l *Qwen3Layer, c *LayerCache, seq, off
 		return mlxgo.Array{}, err
 	}
 
-	// Qwen3 per-head QK norm over the head dimension.
-	if q, err = mlxgo.RMSNorm(q, l.QNorm, eps); err != nil {
-		return mlxgo.Array{}, err
-	}
-	if k, err = mlxgo.RMSNorm(k, l.KNorm, eps); err != nil {
-		return mlxgo.Array{}, err
+	// Qwen3 applies a per-head RMSNorm to the query and key over the head
+	// dimension; Llama and Mistral skip it.
+	if a.QKNorm {
+		if q, err = mlxgo.RMSNorm(q, l.QNorm, eps); err != nil {
+			return mlxgo.Array{}, err
+		}
+		if k, err = mlxgo.RMSNorm(k, l.KNorm, eps); err != nil {
+			return mlxgo.Array{}, err
+		}
 	}
 
 	// Rotary embeddings phased by the cache offset.

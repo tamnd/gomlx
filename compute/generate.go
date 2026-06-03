@@ -11,11 +11,11 @@ import (
 	"github.com/tamnd/gomlx/tokenizer"
 )
 
-// Generator runs autoregressive decoding for a loaded Qwen3 model. It owns the
+// Generator runs autoregressive decoding for a loaded dense model. It owns the
 // model and tokenizer and is reused across requests; per-request state (the KV
 // cache and sampling RNG) is created inside Generate.
 type Generator struct {
-	Model *Qwen3Model
+	Model *DenseModel
 	Tok   *tokenizer.Tokenizer
 	EOS   []int
 }

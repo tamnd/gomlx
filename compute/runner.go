@@ -20,7 +20,7 @@ import (
 // them in lockstep until every sequence finishes. Requests that arrive while a
 // batch is running are served by the next batch.
 type Runner struct {
-	Model    *Qwen3Model
+	Model    *DenseModel
 	Tok      *tokenizer.Tokenizer
 	EOS      []int
 	MaxBatch int

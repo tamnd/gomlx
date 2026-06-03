@@ -13,10 +13,11 @@ import (
 	"github.com/tamnd/gomlx/tokenizer"
 )
 
-// MLXEngine is the GPU-backed Engine. It loads a Qwen3 checkpoint and runs the
-// pure-Go forward pass over MLX. Concurrent requests are not serialized: they
-// are handed to a Runner that batches them into a single forward pass per step,
-// so throughput under load scales with the batch instead of the queue depth.
+// MLXEngine is the GPU-backed Engine. It loads a dense checkpoint (Qwen3, Llama,
+// or Mistral) and runs the pure-Go forward pass over MLX. Concurrent requests are
+// not serialized: they are handed to a Runner that batches them into a single
+// forward pass per step, so throughput under load scales with the batch instead
+// of the queue depth.
 type MLXEngine struct {
 	name string
 	tok  *tokenizer.Tokenizer
@@ -32,7 +33,7 @@ func NewMLXEngine(name, dir string) (*MLXEngine, error) {
 	if err != nil {
 		return nil, fmt.Errorf("mlx engine: read config: %w", err)
 	}
-	args, err := compute.LoadQwen3Args(cfgRaw)
+	args, err := compute.LoadArgs(cfgRaw)
 	if err != nil {
 		return nil, fmt.Errorf("mlx engine: parse config: %w", err)
 	}
@@ -41,7 +42,7 @@ func NewMLXEngine(name, dir string) (*MLXEngine, error) {
 	if err != nil {
 		return nil, fmt.Errorf("mlx engine: open weights: %w", err)
 	}
-	model, err := compute.NewQwen3Model(st, args)
+	model, err := compute.NewModel(st, args)
 	if err != nil {
 		st.Close()
 		return nil, fmt.Errorf("mlx engine: load weights: %w", err)
@@ -59,7 +60,7 @@ func NewMLXEngine(name, dir string) (*MLXEngine, error) {
 	runner := &compute.Runner{
 		Model:    model,
 		Tok:      tok,
-		EOS:      qwen3EOS,
+		EOS:      eosTokens(args),
 		MaxBatch: maxBatch(),
 	}
 	runner.Start()
@@ -77,9 +78,21 @@ func maxBatch() int {
 	return 8
 }
 
-// qwen3EOS lists the token ids that end a Qwen3 turn: <|endoftext|> and
-// <|im_end|>.
+// qwen3EOS lists the token ids that end a Qwen3 turn: <|im_end|> and
+// <|endoftext|>. It is the fallback when a config.json omits eos_token_id, which
+// shipped Qwen3 checkpoints do not.
 var qwen3EOS = []int{151645, 151643}
+
+// eosTokens returns the end-of-turn token ids for a model. It prefers the
+// eos_token_id from the checkpoint config, which is correct per family (Llama and
+// Mistral use different ids than Qwen3), and falls back to the Qwen3 ids only
+// when the config does not declare any.
+func eosTokens(args compute.DenseArgs) []int {
+	if len(args.EOSTokenIDs) > 0 {
+		return args.EOSTokenIDs
+	}
+	return qwen3EOS
+}
 
 func (e *MLXEngine) ModelName() string           { return e.name }
 func (e *MLXEngine) IsMLLM() bool                { return false }
