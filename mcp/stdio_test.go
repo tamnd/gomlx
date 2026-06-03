@@ -26,9 +26,9 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-// serveFakeMCP answers the three protocol methods a session uses, reading requests
-// from r and writing replies to w until the stream ends. It is shared by the
-// in-memory pipe tests and the subprocess transport test.
+// serveFakeMCP reads requests from r, replies on w, and runs until the stream
+// ends. It is shared by the in-memory pipe tests and the subprocess transport
+// test; the SSE test shares the reply logic through fakeReply.
 func serveFakeMCP(r io.Reader, w io.Writer) {
 	cdc := newCodec(r, w)
 	for {
@@ -36,54 +36,63 @@ func serveFakeMCP(r io.Reader, w io.Writer) {
 		if err != nil {
 			return
 		}
-		if m.Method == "" || m.Method == "notifications/initialized" {
-			continue
+		if reply, ok := fakeReply(m); ok {
+			_ = cdc.writeValue(reply)
 		}
-		reply := map[string]any{"jsonrpc": "2.0", "id": json.RawMessage(m.ID)}
-		switch m.Method {
-		case "initialize":
+	}
+}
+
+// fakeReply computes the reply to one request from the fake MCP server, answering
+// the three protocol methods a session uses. The second return is false for
+// messages that take no reply, such as notifications.
+func fakeReply(m message) (map[string]any, bool) {
+	if m.Method == "" || m.Method == "notifications/initialized" {
+		return nil, false
+	}
+	reply := map[string]any{"jsonrpc": "2.0", "id": json.RawMessage(m.ID)}
+	switch m.Method {
+	case "initialize":
+		reply["result"] = map[string]any{
+			"protocolVersion": ProtocolVersion,
+			"capabilities":    map[string]any{},
+			"serverInfo":      map[string]any{"name": "fake", "version": "1.0"},
+		}
+	case "tools/list":
+		reply["result"] = map[string]any{
+			"tools": []any{
+				map[string]any{
+					"name":        "read",
+					"description": "read a file",
+					"inputSchema": map[string]any{"type": "object"},
+				},
+				map[string]any{
+					"name":        "write",
+					"description": "write a file",
+				},
+			},
+		}
+	case "tools/call":
+		var p struct {
+			Name string `json:"name"`
+		}
+		_ = json.Unmarshal(m.Params, &p)
+		if p.Name == "boom" {
 			reply["result"] = map[string]any{
-				"protocolVersion": ProtocolVersion,
-				"capabilities":    map[string]any{},
-				"serverInfo":      map[string]any{"name": "fake", "version": "1.0"},
+				"content": []any{map[string]any{"type": "text", "text": "it failed"}},
+				"isError": true,
 			}
-		case "tools/list":
+		} else {
 			reply["result"] = map[string]any{
-				"tools": []any{
-					map[string]any{
-						"name":        "read",
-						"description": "read a file",
-						"inputSchema": map[string]any{"type": "object"},
-					},
-					map[string]any{
-						"name":        "write",
-						"description": "write a file",
-					},
+				"content": []any{
+					map[string]any{"type": "text", "text": "line one"},
+					map[string]any{"type": "text", "text": "line two"},
 				},
 			}
-		case "tools/call":
-			var p struct {
-				Name string `json:"name"`
-			}
-			_ = json.Unmarshal(m.Params, &p)
-			if p.Name == "boom" {
-				reply["result"] = map[string]any{
-					"content": []any{map[string]any{"type": "text", "text": "it failed"}},
-					"isError": true,
-				}
-			} else {
-				reply["result"] = map[string]any{
-					"content": []any{
-						map[string]any{"type": "text", "text": "line one"},
-						map[string]any{"type": "text", "text": "line two"},
-					},
-				}
-			}
-		default:
-			reply["error"] = map[string]any{"code": -32601, "message": "method not found"}
 		}
-		_ = cdc.writeValue(reply)
+	default:
+		reply["error"] = map[string]any{"code": -32601, "message": "method not found"}
 	}
+	return reply, true
 }
 
 func TestDialStdioRoundTrip(t *testing.T) {
