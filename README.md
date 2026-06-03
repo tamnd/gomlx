@@ -115,6 +115,13 @@ which are equal because embeddings have no completion side.
 The embedding backend ships with the compute backend. Until then the endpoint reports itself
 unconfigured with 503 rather than returning fabricated vectors.
 
+## Cancelling a request
+
+A streaming request can be stopped while it runs. Take the `id` from the first streaming chunk and
+send `POST /v1/requests/{id}/cancel` (or `DELETE /v1/requests/{id}`); the stream stops and the id is
+freed. A request that has already finished, or one that was never streaming, is a 404, since there is
+nothing left to stop.
+
 ## Benchmarks
 
 Measured on an Apple M4 (24 GB) running Qwen3-0.6B in bf16, against a Python MLX serving baseline on
