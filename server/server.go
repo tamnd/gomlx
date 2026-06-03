@@ -51,6 +51,7 @@ func (a *App) Handler() http.Handler {
 	mux.HandleFunc("POST /v1/messages", a.deps.AnthropicMessages)
 	mux.HandleFunc("POST /v1/embeddings", a.deps.Embeddings)
 	mux.HandleFunc("GET /v1/models", a.deps.Models)
+	mux.HandleFunc("GET /v1/status", a.deps.Status)
 	mux.HandleFunc("GET /v1/models/{model_id}", a.deps.RetrieveModel)
 	mux.HandleFunc("POST /v1/requests/{request_id}/cancel", a.deps.CancelRequest)
 	mux.HandleFunc("DELETE /v1/requests/{request_id}", a.deps.CancelRequest)

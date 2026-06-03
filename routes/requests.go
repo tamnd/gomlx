@@ -39,6 +39,13 @@ func (c *cancelRegistry) remove(id string) {
 	c.mu.Unlock()
 }
 
+// count reports how many requests are in flight.
+func (c *cancelRegistry) count() int {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return len(c.cancels)
+}
+
 // cancel stops the request for id and forgets it, returning false when no such
 // request is in flight.
 func (c *cancelRegistry) cancel(id string) bool {
