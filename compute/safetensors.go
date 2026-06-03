@@ -249,6 +249,12 @@ func (s *SafeTensors) Bytes(name string) ([]byte, error) {
 // Names returns the tensor names in file order.
 func (s *SafeTensors) Names() []string { return s.Header.Order }
 
+// Has reports whether the file contains a tensor with the given name.
+func (s *SafeTensors) Has(name string) bool {
+	_, ok := s.Header.Tensors[name]
+	return ok
+}
+
 // Close unmaps the file. It is a no-op for a value created by FromBytes, whose
 // backing slice the caller owns.
 func (s *SafeTensors) Close() error {
