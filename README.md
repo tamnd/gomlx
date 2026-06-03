@@ -50,6 +50,38 @@ gomlx models                  # list known model aliases
 gomlx serve qwen3.5-4b        # start the server (serving layer wiring in progress)
 ```
 
+## MCP
+
+gomlx can connect to Model Context Protocol servers and pool their tools. Point it at a JSON config
+with `-mcp-config` and it dials every enabled server at startup, over a subprocess (stdio) or an HTTP
+event stream (sse). A server that fails to connect is reported in its status rather than stopping the
+others.
+
+```
+gomlx serve qwen3.5-4b -mcp-config mcp.json
+```
+
+```json
+{
+  "servers": {
+    "files": {
+      "transport": "stdio",
+      "command": "my-files-mcp",
+      "args": ["--root", "/tmp"]
+    },
+    "web": {
+      "transport": "sse",
+      "url": "http://127.0.0.1:9001/sse"
+    }
+  }
+}
+```
+
+Three endpoints expose the subsystem: `GET /v1/mcp/tools` lists the pooled tools by their namespaced
+`server__tool` name, `GET /v1/mcp/servers` reports each server's connection state, and
+`POST /v1/mcp/execute` runs one tool by name. High-risk tools and dangerous arguments are refused at
+the gate before a server is contacted.
+
 ## Benchmarks
 
 Measured on an Apple M4 (24 GB) running Qwen3-0.6B in bf16, against a Python MLX serving baseline on
