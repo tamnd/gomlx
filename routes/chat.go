@@ -152,14 +152,18 @@ func (d *Deps) streamChat(w http.ResponseWriter, r *http.Request, model string, 
 	w.WriteHeader(http.StatusOK)
 	flusher.Flush()
 
-	ch, err := d.Engine.StreamChat(r.Context(), msgs, p, toolDefs(req.Tools))
+	id := chatIDSeq.next()
+	ctx, stop := d.trackStream(r.Context(), id)
+	defer stop()
+
+	ch, err := d.Engine.StreamChat(ctx, msgs, p, toolDefs(req.Tools))
 	if err != nil {
 		// Headers already sent; emit an error chunk best-effort.
 		return
 	}
 
 	bw := bufio.NewWriter(w)
-	enc := api.NewStreamEncoder(bw, chatIDSeq.next(), model, time.Now().Unix())
+	enc := api.NewStreamEncoder(bw, id, model, time.Now().Unix())
 	_ = enc.Role()
 
 	// Set up the streaming tool parser when tools are on offer.

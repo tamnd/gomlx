@@ -33,6 +33,10 @@ type Deps struct {
 	// started without an embedding model, in which case /v1/embeddings reports
 	// the subsystem as unconfigured.
 	Embedder engine.Embedder
+
+	// Cancels tracks in-flight streaming requests so they can be cancelled by
+	// id. Its zero value is ready to use.
+	Cancels cancelRegistry
 }
 
 // writeJSON serializes v as JSON with the given status.

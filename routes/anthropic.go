@@ -249,13 +249,16 @@ func (d *Deps) streamAnthropic(w http.ResponseWriter, r *http.Request, model str
 	w.WriteHeader(http.StatusOK)
 	flusher.Flush()
 
-	ch, err := d.Engine.StreamChat(r.Context(), msgs, p, toolDefs(req.Tools))
+	msgID := anthropicIDSeq.next()
+	ctx, stop := d.trackStream(r.Context(), msgID)
+	defer stop()
+
+	ch, err := d.Engine.StreamChat(ctx, msgs, p, toolDefs(req.Tools))
 	if err != nil {
 		return
 	}
 
 	bw := bufio.NewWriter(w)
-	msgID := anthropicIDSeq.next()
 	emit := func(event string, data any) bool {
 		b, mErr := json.Marshal(data)
 		if mErr != nil {
