@@ -21,6 +21,20 @@ import (
 // binary was compiled without the "mlx" build tag, so no MLX runtime is linked.
 var ErrUnavailable = errors.New("mlxgo: built without the mlx tag; rebuild with -tags mlx and an MLX runtime")
 
+// DType names the element types the binding can create arrays of. The values
+// are a small subset of MLX dtypes: the float types used for activations and
+// weights, plus the integer types used for token ids, argmax results, and
+// packed quantized weights.
+type DType int
+
+const (
+	F32 DType = iota
+	F16
+	BF16
+	U32
+	I32
+)
+
 // Array is a handle to an MLX array. ptr is the underlying mlx_array in the real
 // build and nil in the stub. shape is tracked on the Go side so callers can plan
 // without round-tripping to the device.

@@ -34,3 +34,56 @@ func Eval(arrays ...Array) error { return ErrUnavailable }
 
 // Free would release the device memory backing an array.
 func (a Array) Free() {}
+
+// FromRawBytes would upload a raw little-endian buffer with the given dtype.
+func FromRawBytes(shape []int, dt DType, raw []byte) (Array, error) {
+	return Array{}, ErrUnavailable
+}
+
+// ToUint32 would copy a uint32 array back to host memory.
+func (a Array) ToUint32() ([]uint32, error) { return nil, ErrUnavailable }
+
+// Take would gather rows of a at the given indices (embedding lookup).
+func Take(a, indices Array) (Array, error) { return Array{}, ErrUnavailable }
+
+// Reshape would return a with a new shape.
+func Reshape(a Array, shape []int) (Array, error) { return Array{}, ErrUnavailable }
+
+// Transpose would permute the axes of a.
+func Transpose(a Array, axes []int) (Array, error) { return Array{}, ErrUnavailable }
+
+// SoftmaxAxis would softmax a along one axis.
+func SoftmaxAxis(a Array, axis int) (Array, error) { return Array{}, ErrUnavailable }
+
+// Concat would join arrays along an axis.
+func Concat(arrays []Array, axis int) (Array, error) { return Array{}, ErrUnavailable }
+
+// Multiply would compute a * b elementwise.
+func Multiply(a, b Array) (Array, error) { return Array{}, ErrUnavailable }
+
+// Silu would compute x * sigmoid(x).
+func Silu(a Array) (Array, error) { return Array{}, ErrUnavailable }
+
+// Argmax would return the index of the maximum along an axis.
+func Argmax(a Array, axis int, keepdims bool) (Array, error) { return Array{}, ErrUnavailable }
+
+// Astype would cast a to another dtype.
+func Astype(a Array, dt DType) (Array, error) { return Array{}, ErrUnavailable }
+
+// RMSNorm would apply the fused RMS normalization.
+func RMSNorm(x, weight Array, eps float32) (Array, error) { return Array{}, ErrUnavailable }
+
+// RoPE would apply rotary position embeddings.
+func RoPE(x Array, dims int, traditional bool, base, scale float32, offset int) (Array, error) {
+	return Array{}, ErrUnavailable
+}
+
+// SDPA would run fused scaled dot-product attention.
+func SDPA(q, k, v Array, scale float32, causal bool) (Array, error) {
+	return Array{}, ErrUnavailable
+}
+
+// QuantizedMatmul would multiply x by a quantized weight.
+func QuantizedMatmul(x, w, scales, biases Array, transpose bool, groupSize, bits int) (Array, error) {
+	return Array{}, ErrUnavailable
+}
