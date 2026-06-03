@@ -26,8 +26,9 @@ type App struct {
 
 // New builds an App for the given config and engine. mcpMgr may be nil when the
 // server runs without an MCP config; the MCP routes then report an empty,
-// unconfigured subsystem.
-func New(cfg config.ServerConfig, eng engine.Engine, mcpMgr *mcp.Manager) *App {
+// unconfigured subsystem. emb may be nil when the server runs without an
+// embedding model; /v1/embeddings then reports the subsystem as unconfigured.
+func New(cfg config.ServerConfig, eng engine.Engine, mcpMgr *mcp.Manager, emb engine.Embedder) *App {
 	return &App{
 		cfg:    cfg,
 		engine: eng,
@@ -37,6 +38,7 @@ func New(cfg config.ServerConfig, eng engine.Engine, mcpMgr *mcp.Manager) *App {
 			DefaultMaxTokens: cfg.MaxTokens,
 			ToolCallParser:   cfg.ToolCallParser,
 			MCP:              mcpMgr,
+			Embedder:         emb,
 		},
 	}
 }
@@ -47,6 +49,7 @@ func (a *App) Handler() http.Handler {
 	mux.HandleFunc("POST /v1/chat/completions", a.deps.ChatCompletions)
 	mux.HandleFunc("POST /v1/completions", a.deps.Completions)
 	mux.HandleFunc("POST /v1/messages", a.deps.AnthropicMessages)
+	mux.HandleFunc("POST /v1/embeddings", a.deps.Embeddings)
 	mux.HandleFunc("GET /v1/models", a.deps.Models)
 	mux.HandleFunc("GET /health", a.deps.Health)
 	mux.HandleFunc("GET /v1/health", a.deps.Health)
