@@ -21,6 +21,10 @@ type ServerConfig struct {
 	MaxConcurrent int    // max concurrent requests admitted to the engine
 	APIKey        string // optional bearer key; empty disables auth
 
+	// MCPConfig is the path to a JSON file describing the MCP servers to
+	// connect to. Empty disables the MCP subsystem.
+	MCPConfig string
+
 	// Mock runs the serving layer with the mock decode backend (no GPU). Used
 	// before the compute backend (stage 4) lands.
 	Mock bool

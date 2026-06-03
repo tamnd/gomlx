@@ -17,6 +17,7 @@ import (
 	"github.com/tamnd/gomlx/bench"
 	"github.com/tamnd/gomlx/config"
 	"github.com/tamnd/gomlx/engine"
+	"github.com/tamnd/gomlx/mcp"
 	"github.com/tamnd/gomlx/models"
 	"github.com/tamnd/gomlx/server"
 )
@@ -76,6 +77,7 @@ func runServe(args []string) {
 	fs.IntVar(&cfg.MaxTokens, "max-tokens", cfg.MaxTokens, "default max output tokens")
 	fs.IntVar(&cfg.MaxConcurrent, "max-concurrent", cfg.MaxConcurrent, "max concurrent requests")
 	fs.StringVar(&cfg.APIKey, "api-key", "", "bearer API key (default: auth disabled)")
+	fs.StringVar(&cfg.MCPConfig, "mcp-config", "", "path to an MCP server config JSON (default: MCP disabled)")
 	fs.BoolVar(&cfg.Mock, "mock", false, "run with the mock decode backend (no GPU)")
 	_ = fs.Parse(args)
 
@@ -129,15 +131,49 @@ func runServe(args []string) {
 		backend = "mlx backend"
 	}
 
-	app := server.New(cfg, eng)
-	fmt.Printf("  listen:           http://%s (%s)\n\n", app.Addr(), backend)
-
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
+
+	// Connect the MCP servers before serving so their tools are pooled and ready.
+	// A server that fails to connect is reported through its status, not fatal;
+	// only a bad config file or every server failing stops startup.
+	var mcpMgr *mcp.Manager
+	if cfg.MCPConfig != "" {
+		m, err := loadMCP(ctx, cfg.MCPConfig)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "\ngomlx serve: mcp: %v\n", err)
+			os.Exit(1)
+		}
+		mcpMgr = m
+		defer mcpMgr.Close()
+		fmt.Printf("  mcp_servers:      %d (%d tools)\n", len(mcpMgr.Statuses()), len(mcpMgr.Registry().Tools()))
+	}
+
+	app := server.New(cfg, eng, mcpMgr)
+	fmt.Printf("  listen:           http://%s (%s)\n\n", app.Addr(), backend)
 	if err := app.ListenAndServe(ctx); err != nil {
 		fmt.Fprintf(os.Stderr, "gomlx serve: %v\n", err)
 		os.Exit(1)
 	}
+}
+
+// loadMCP reads an MCP server config from path, builds a manager, and connects
+// its enabled servers. It returns an error when the file cannot be read or
+// parsed, or when every enabled server fails to connect.
+func loadMCP(ctx context.Context, path string) (*mcp.Manager, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	cfg, err := mcp.ParseConfig(data)
+	if err != nil {
+		return nil, err
+	}
+	mgr := mcp.NewManager(cfg, mcp.ClientInfo{Name: "gomlx", Version: version})
+	if err := mgr.Connect(ctx); err != nil {
+		return nil, err
+	}
+	return mgr, nil
 }
 
 func runBench(args []string) {

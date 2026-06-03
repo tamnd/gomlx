@@ -12,6 +12,7 @@ import (
 
 	"github.com/tamnd/gomlx/config"
 	"github.com/tamnd/gomlx/engine"
+	"github.com/tamnd/gomlx/mcp"
 	"github.com/tamnd/gomlx/middleware"
 	"github.com/tamnd/gomlx/routes"
 )
@@ -23,8 +24,10 @@ type App struct {
 	deps   *routes.Deps
 }
 
-// New builds an App for the given config and engine.
-func New(cfg config.ServerConfig, eng engine.Engine) *App {
+// New builds an App for the given config and engine. mcpMgr may be nil when the
+// server runs without an MCP config; the MCP routes then report an empty,
+// unconfigured subsystem.
+func New(cfg config.ServerConfig, eng engine.Engine, mcpMgr *mcp.Manager) *App {
 	return &App{
 		cfg:    cfg,
 		engine: eng,
@@ -33,6 +36,7 @@ func New(cfg config.ServerConfig, eng engine.Engine) *App {
 			Model:            cfg.Model,
 			DefaultMaxTokens: cfg.MaxTokens,
 			ToolCallParser:   cfg.ToolCallParser,
+			MCP:              mcpMgr,
 		},
 	}
 }
@@ -46,6 +50,9 @@ func (a *App) Handler() http.Handler {
 	mux.HandleFunc("GET /v1/models", a.deps.Models)
 	mux.HandleFunc("GET /health", a.deps.Health)
 	mux.HandleFunc("GET /v1/health", a.deps.Health)
+	mux.HandleFunc("GET /v1/mcp/tools", a.deps.MCPTools)
+	mux.HandleFunc("GET /v1/mcp/servers", a.deps.MCPServers)
+	mux.HandleFunc("POST /v1/mcp/execute", a.deps.MCPExecute)
 
 	return middleware.Chain(mux,
 		middleware.CORS,

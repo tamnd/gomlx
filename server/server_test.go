@@ -20,7 +20,7 @@ func newTestServer(apiKey string) *httptest.Server {
 	cfg := config.Default()
 	cfg.Model = "qwen3.5-4b"
 	cfg.APIKey = apiKey
-	app := New(cfg, engine.NewMockEngine(cfg.Model))
+	app := New(cfg, engine.NewMockEngine(cfg.Model), nil)
 	return httptest.NewServer(app.Handler())
 }
 
