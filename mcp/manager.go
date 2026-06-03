@@ -61,15 +61,14 @@ func newManagerDial(cfg Config, info ClientInfo, dial Dialer) *Manager {
 	}
 }
 
-// DefaultDial opens a session over the transport named in cfg. SSE is recognized
-// but not yet implemented, and says so plainly rather than failing as if the
-// server were down.
+// DefaultDial opens a session over the transport named in cfg, a subprocess for
+// stdio or an HTTP event stream for SSE.
 func DefaultDial(ctx context.Context, cfg ServerConfig, info ClientInfo) (*Session, error) {
 	switch cfg.Transport {
 	case TransportStdio, "":
 		return DialStdio(ctx, cfg, info)
 	case TransportSSE:
-		return nil, fmt.Errorf("mcp: sse transport not yet supported for server %q", cfg.Name)
+		return DialSSE(ctx, cfg, info, nil)
 	default:
 		return nil, fmt.Errorf("mcp: unknown transport %q for server %q", cfg.Transport, cfg.Name)
 	}
