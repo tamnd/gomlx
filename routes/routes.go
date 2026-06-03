@@ -11,6 +11,7 @@ import (
 
 	"github.com/tamnd/gomlx/api"
 	"github.com/tamnd/gomlx/engine"
+	"github.com/tamnd/gomlx/mcp"
 )
 
 // Deps carries the shared dependencies the route handlers need.
@@ -22,6 +23,11 @@ type Deps struct {
 	// ToolCallParser names the wire format used to extract tool calls from
 	// model output. Empty falls back to the auto parser.
 	ToolCallParser string
+
+	// MCP pools the tools from the configured MCP servers. It is nil when the
+	// server was started without an MCP config, in which case the MCP routes
+	// report an empty, unconfigured subsystem.
+	MCP *mcp.Manager
 }
 
 // writeJSON serializes v as JSON with the given status.
