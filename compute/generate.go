@@ -3,6 +3,7 @@
 package compute
 
 import (
+	"context"
 	"math/rand"
 	"strings"
 
@@ -26,6 +27,15 @@ type GenConfig struct {
 	Logits    LogitsProcessor
 	Stop      []string
 	Seed      int64
+
+	// OnToken, when set, is called with the newly decoded text after each token,
+	// which is the delta a streaming response emits. It is not called for text
+	// trimmed away by a stop string.
+	OnToken func(delta string)
+
+	// Ctx, when set, is checked before each decode step so a cancelled request
+	// stops generation promptly.
+	Ctx context.Context
 }
 
 // GenResult is the outcome of a generation run.
@@ -49,6 +59,7 @@ func (g *Generator) Generate(prompt string, cfg GenConfig) (GenResult, error) {
 
 	cur := toInt32(promptIDs)
 	generated := make([]int, 0, cfg.MaxTokens)
+	prevText := ""
 	rng := rand.New(rand.NewSource(cfg.Seed))
 
 	eos := make(map[int]bool, len(g.EOS))
@@ -62,6 +73,10 @@ func (g *Generator) Generate(prompt string, cfg GenConfig) (GenResult, error) {
 	}
 
 	for step := 0; step < maxTokens; step++ {
+		if cfg.Ctx != nil && cfg.Ctx.Err() != nil {
+			res.FinishReason = "cancel"
+			break
+		}
 		logits, err := g.Model.Forward(cur, caches, offset)
 		if err != nil {
 			return res, err
@@ -84,13 +99,21 @@ func (g *Generator) Generate(prompt string, cfg GenConfig) (GenResult, error) {
 		}
 		generated = append(generated, next)
 
-		if stop, cut := hitStopString(g.Tok.Decode(generated), cfg.Stop); stop {
+		full := g.Tok.Decode(generated)
+		if stop, cut := hitStopString(full, cfg.Stop); stop {
+			if cfg.OnToken != nil && len(cut) > len(prevText) {
+				cfg.OnToken(cut[len(prevText):])
+			}
 			res.Text = cut
 			res.Tokens = generated
 			res.CompletionTokens = len(generated)
 			res.FinishReason = "stop"
 			return res, nil
 		}
+		if cfg.OnToken != nil && len(full) > len(prevText) {
+			cfg.OnToken(full[len(prevText):])
+		}
+		prevText = full
 
 		cur = []int32{int32(next)}
 	}
