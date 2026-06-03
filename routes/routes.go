@@ -28,6 +28,11 @@ type Deps struct {
 	// server was started without an MCP config, in which case the MCP routes
 	// report an empty, unconfigured subsystem.
 	MCP *mcp.Manager
+
+	// Embedder serves the embeddings endpoint. It is nil when the server was
+	// started without an embedding model, in which case /v1/embeddings reports
+	// the subsystem as unconfigured.
+	Embedder engine.Embedder
 }
 
 // writeJSON serializes v as JSON with the given status.

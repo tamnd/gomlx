@@ -100,6 +100,21 @@ Three endpoints expose the subsystem: `GET /v1/mcp/tools` lists the pooled tools
 `POST /v1/mcp/execute` runs one tool by name. High-risk tools and dangerous arguments are refused at
 the gate before a server is contacted.
 
+## Embeddings
+
+`POST /v1/embeddings` follows the OpenAI contract. It accepts all four input shapes: a single string,
+a list of strings, a single pre-tokenized input (a list of integer token ids), and a batch of
+pre-tokenized inputs (a list of those lists). The integer forms are kept off the string path, since
+the token id 123 embeds differently from the word "123".
+
+`dimensions` truncates each vector and renormalizes it to unit length, so a shortened vector stays
+valid for cosine similarity. `encoding_format` is `float` (a JSON array) or `base64` (little-endian
+float32 bytes), the latter saving bandwidth on large batches. Usage reports prompt and total tokens,
+which are equal because embeddings have no completion side.
+
+The embedding backend ships with the compute backend. Until then the endpoint reports itself
+unconfigured with 503 rather than returning fabricated vectors.
+
 ## Benchmarks
 
 Measured on an Apple M4 (24 GB) running Qwen3-0.6B in bf16, against a Python MLX serving baseline on

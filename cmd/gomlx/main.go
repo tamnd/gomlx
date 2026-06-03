@@ -156,7 +156,9 @@ func runServe(args []string) {
 		fmt.Printf("  mcp_servers:      %d (%d tools)\n", len(mcpMgr.Statuses()), len(mcpMgr.Registry().Tools()))
 	}
 
-	app := server.New(cfg, eng, mcpMgr)
+	// The embedding backend lands with the compute backend; until then the
+	// embeddings route reports itself unconfigured rather than serving vectors.
+	app := server.New(cfg, eng, mcpMgr, nil)
 	fmt.Printf("  listen:           http://%s (%s)\n\n", app.Addr(), backend)
 	if err := app.ListenAndServe(ctx); err != nil {
 		fmt.Fprintf(os.Stderr, "gomlx serve: %v\n", err)
