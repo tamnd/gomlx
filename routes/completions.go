@@ -72,12 +72,15 @@ func (d *Deps) streamCompletion(w http.ResponseWriter, r *http.Request, model, p
 	w.WriteHeader(http.StatusOK)
 	flusher.Flush()
 
-	ch, err := d.Engine.StreamGenerate(r.Context(), prompt, p)
+	id := cmplIDSeq.next()
+	ctx, stop := d.trackStream(r.Context(), id)
+	defer stop()
+
+	ch, err := d.Engine.StreamGenerate(ctx, prompt, p)
 	if err != nil {
 		return
 	}
 	bw := bufio.NewWriter(w)
-	id := cmplIDSeq.next()
 	created := time.Now().Unix()
 	finish := "stop"
 	for out := range ch {
