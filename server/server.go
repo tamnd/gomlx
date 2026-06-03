@@ -51,6 +51,7 @@ func (a *App) Handler() http.Handler {
 	mux.HandleFunc("POST /v1/messages", a.deps.AnthropicMessages)
 	mux.HandleFunc("POST /v1/embeddings", a.deps.Embeddings)
 	mux.HandleFunc("GET /v1/models", a.deps.Models)
+	mux.HandleFunc("GET /v1/models/{model_id}", a.deps.RetrieveModel)
 	mux.HandleFunc("GET /health", a.deps.Health)
 	mux.HandleFunc("GET /v1/health", a.deps.Health)
 	mux.HandleFunc("GET /v1/mcp/tools", a.deps.MCPTools)
