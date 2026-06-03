@@ -48,7 +48,25 @@ free disk; `scripts/bootstrap_mlx.sh` warns when space is tight and honors `MLX_
 ```
 gomlx models                  # list known model aliases
 gomlx serve qwen3.5-4b        # start the server (serving layer wiring in progress)
+gomlx agents                  # list agent profiles
+gomlx agents hermes           # show how to point one agent at the server
 ```
+
+## Agents
+
+Many coding agents speak the OpenAI API but each wants its config in a different shape, points at a
+slightly different URL, and has its own streaming quirks. gomlx ships a profile for each known agent
+describing what it needs, so configuring one is a lookup rather than guesswork.
+
+```
+gomlx agents                                  # list the profiles, most popular first
+gomlx agents hermes -model qwen3.5-9b         # print a ready-to-use config for one
+```
+
+A profile carries the config format and template, the recommended models, the tool parser to force
+if any, streaming tags the agent wraps around tool calls, and known issues. Profiles are versioned:
+when an agent changes its config format, a version block overrides the base without breaking older
+releases.
 
 ## MCP
 
