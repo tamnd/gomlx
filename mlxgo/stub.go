@@ -83,6 +83,14 @@ func SDPA(q, k, v Array, scale float32, causal bool) (Array, error) {
 	return Array{}, ErrUnavailable
 }
 
+// SDPAMasked would run fused attention with an explicit additive mask.
+func SDPAMasked(q, k, v, mask Array, scale float32) (Array, error) {
+	return Array{}, ErrUnavailable
+}
+
+// DType would report the element type of the array.
+func (a Array) DType() DType { return F32 }
+
 // QuantizedMatmul would multiply x by a quantized weight.
 func QuantizedMatmul(x, w, scales, biases Array, transpose bool, groupSize, bits int) (Array, error) {
 	return Array{}, ErrUnavailable
