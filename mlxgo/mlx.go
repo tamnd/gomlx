@@ -6,20 +6,30 @@ package mlxgo
 
 /*
 #cgo CFLAGS: -I${SRCDIR}/../third_party/mlx-c/include
-#cgo LDFLAGS: -L${SRCDIR}/../third_party/mlx-c/lib -lmlxc -lmlx -lc++
+#cgo LDFLAGS: -L${SRCDIR}/../third_party/mlx-c/lib -lmlxc -lmlx -framework Metal -framework Foundation -framework Accelerate -lc++
 
 #include <stdlib.h>
+#include <string.h>
 #include "mlx/c/mlx.h"
 
-// new_data uploads a row-major float32 buffer as an mlx_array. The shape is
-// passed as C ints; mlx copies the data, so the Go buffer can be reused after.
+// from_f32 uploads a row-major float32 buffer as an mlx_array. mlx copies the
+// data, so the Go buffer can be reused after the call returns.
 static mlx_array gomlx_from_f32(const float* data, const int* shape, int ndim) {
     return mlx_array_new_data((const void*)data, shape, ndim, MLX_FLOAT32);
+}
+
+// eval_one forces evaluation of a single array by wrapping it in a vector.
+static int gomlx_eval_one(mlx_array a) {
+    mlx_vector_array v = mlx_vector_array_new_value(a);
+    int rc = mlx_eval(v);
+    mlx_vector_array_free(v);
+    return rc;
 }
 */
 import "C"
 
 import (
+	"fmt"
 	"runtime"
 	"unsafe"
 )
@@ -33,9 +43,13 @@ type Stream struct {
 	s C.mlx_stream
 }
 
+// gpuStream is the process-wide default GPU stream, fetched once. mlx tracks a
+// single default GPU stream, so every op shares it.
+var gpuStream = C.mlx_default_gpu_stream_new()
+
 // NewStream returns the default GPU stream.
 func NewStream() (Stream, error) {
-	return Stream{s: C.mlx_default_gpu_stream()}, nil
+	return Stream{s: gpuStream}, nil
 }
 
 // arrayHandle recovers the C handle stored in an Array.
@@ -44,14 +58,14 @@ func arrayHandle(a Array) C.mlx_array {
 }
 
 // wrap boxes a C handle and shape into an Array, attaching a finalizer that
-// frees the device memory if the caller forgets to.
+// frees the device memory if the caller forgets to. The box is a Go allocation
+// (SetFinalizer requires that); it only holds a C pointer, which cgo permits.
 func wrap(h C.mlx_array, shape []int) Array {
-	box := (*C.mlx_array)(C.malloc(C.size_t(unsafe.Sizeof(h))))
+	box := new(C.mlx_array)
 	*box = h
 	a := Array{ptr: unsafe.Pointer(box), shape: shape}
 	runtime.SetFinalizer(box, func(p *C.mlx_array) {
 		C.mlx_array_free(*p)
-		C.free(unsafe.Pointer(p))
 	})
 	return a
 }
@@ -77,8 +91,8 @@ func FromFloat32(shape []int, data []float32) (Array, error) {
 // ToFloat32 evaluates the array and copies it back to host memory.
 func (a Array) ToFloat32() ([]float32, error) {
 	h := arrayHandle(a)
-	if err := evalHandles(h); err != nil {
-		return nil, err
+	if rc := C.gomlx_eval_one(h); rc != 0 {
+		return nil, fmt.Errorf("mlxgo: eval failed (rc=%d)", int(rc))
 	}
 	n := a.NumElements()
 	out := make([]float32, n)
@@ -89,32 +103,30 @@ func (a Array) ToFloat32() ([]float32, error) {
 	return out, nil
 }
 
-// MatMul computes a @ b on the default stream.
+// MatMul computes a @ b on the default GPU stream.
 func MatMul(a, b Array) (Array, error) {
 	var res C.mlx_array
-	C.mlx_matmul(&res, arrayHandle(a), arrayHandle(b), C.mlx_default_gpu_stream())
+	if rc := C.mlx_matmul(&res, arrayHandle(a), arrayHandle(b), gpuStream); rc != 0 {
+		return Array{}, fmt.Errorf("mlxgo: matmul failed (rc=%d)", int(rc))
+	}
 	return wrap(res, matmulShape(a.shape, b.shape)), nil
 }
 
-// Add computes a + b on the default stream.
+// Add computes a + b on the default GPU stream.
 func Add(a, b Array) (Array, error) {
 	var res C.mlx_array
-	C.mlx_add(&res, arrayHandle(a), arrayHandle(b), C.mlx_default_gpu_stream())
+	if rc := C.mlx_add(&res, arrayHandle(a), arrayHandle(b), gpuStream); rc != 0 {
+		return Array{}, fmt.Errorf("mlxgo: add failed (rc=%d)", int(rc))
+	}
 	return wrap(res, a.shape), nil
 }
 
 // Eval forces evaluation of the lazy graph for the given arrays.
 func Eval(arrays ...Array) error {
-	hs := make([]C.mlx_array, len(arrays))
-	for i, a := range arrays {
-		hs[i] = arrayHandle(a)
-	}
-	return evalHandles(hs...)
-}
-
-func evalHandles(hs ...C.mlx_array) error {
-	for _, h := range hs {
-		C.mlx_eval(h)
+	for _, a := range arrays {
+		if rc := C.gomlx_eval_one(arrayHandle(a)); rc != 0 {
+			return fmt.Errorf("mlxgo: eval failed (rc=%d)", int(rc))
+		}
 	}
 	return nil
 }
@@ -128,7 +140,6 @@ func (a Array) Free() {
 	box := (*C.mlx_array)(a.ptr)
 	runtime.SetFinalizer(box, nil)
 	C.mlx_array_free(*box)
-	C.free(a.ptr)
 }
 
 // matmulShape derives the result shape of a 2D-or-batched matmul, leaving the
