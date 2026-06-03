@@ -70,6 +70,52 @@ func TestRunnerConcurrentMatchesSingle(t *testing.T) {
 	}
 }
 
+// TestRunnerUnpaddedMatchesSingle batches several copies of one prompt, so every
+// sequence shares a length and the batch carries no left padding. The decoded
+// prefix must match the single-stream Generator, covering the equal-length batch
+// shape alongside the mixed-length case in TestRunnerConcurrentMatchesSingle.
+func TestRunnerUnpaddedMatchesSingle(t *testing.T) {
+	dir := modelDir(t)
+	m, tok := loadModel(t, dir)
+
+	const prompt = "The capital of France is"
+	const prefix = 8
+	cfg := func() GenConfig { return GenConfig{MaxTokens: 16} }
+
+	gen := &Generator{Model: m, Tok: tok, EOS: []int{151645, 151643}}
+	single, err := gen.Generate(prompt, cfg())
+	if err != nil {
+		t.Fatalf("single generate: %v", err)
+	}
+	want := single.Tokens[:prefix]
+
+	runner := &Runner{Model: m, Tok: tok, EOS: []int{151645, 151643}, MaxBatch: 6}
+	runner.Start()
+
+	const n = 6
+	var wg sync.WaitGroup
+	errs := make(chan error, n)
+	for k := 0; k < n; k++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			res, err := runner.Generate(prompt, cfg())
+			if err != nil {
+				errs <- err
+				return
+			}
+			if len(res.Tokens) < prefix || !equalInts(res.Tokens[:prefix], want) {
+				t.Errorf("batch=%v\nsingle=%v", res.Tokens, want)
+			}
+		}()
+	}
+	wg.Wait()
+	close(errs)
+	for err := range errs {
+		t.Fatalf("runner generate: %v", err)
+	}
+}
+
 func equalInts(a, b []int) bool {
 	if len(a) != len(b) {
 		return false

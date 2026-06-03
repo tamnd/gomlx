@@ -50,6 +50,32 @@ gomlx models                  # list known model aliases
 gomlx serve qwen3.5-4b        # start the server (serving layer wiring in progress)
 ```
 
+## Benchmarks
+
+Measured on an Apple M4 (24 GB) running Qwen3-0.6B in bf16, against a Python MLX serving baseline on
+the same machine and weights with its prefix cache disabled so both do the same compute. The client
+is `gomlx bench` driving the HTTP API. Numbers vary a few percent run to run.
+
+| Workload | gomlx | Baseline | gomlx vs baseline |
+| --- | --- | --- | --- |
+| Serving overhead: 1 token, 16 concurrent, 128 requests | 157.7 req/s | 17.2 req/s | 9.2x |
+| Short replies: 32 tokens, 16 concurrent, 64 requests | 326.9 tok/s, 10.2 req/s | 273.0 tok/s, 8.5 req/s | 1.20x |
+| Sustained decode: 128 tokens, 8 concurrent, 32 requests | 188.7 tok/s | 275.3 tok/s | 0.69x |
+| Single stream: 128 tokens, 1 client | 62.3 tok/s | 69.7 tok/s | 0.89x |
+
+The serving overhead is where Go pays off. With one-token replies the time is almost all request
+handling rather than GPU work, and gomlx serves these more than nine times faster: no interpreter
+lock, a goroutine per request, and tokenize, detokenize, and JSON kept off the thread that drives the
+GPU. That advantage still leads under a realistic mix of short replies at high concurrency, where
+gomlx is about 1.2x ahead on both tokens per second and requests per second.
+
+It trails on long, decode-bound runs. Single-stream throughput is set by the same Metal kernels for
+both, and there gomlx tracks the hardware within about ten percent. Under sustained 128-token decode
+the baseline pulls ahead because it compiles its model forward into one fused graph per step, while
+gomlx still issues each MLX operation eagerly across the cgo boundary. Closing that gap means adding
+graph compilation to the binding so a decode step is a single dispatch rather than dozens. That work
+is tracked separately; the numbers above are reported as measured, wins and losses both.
+
 ## License
 
 Apache-2.0.
