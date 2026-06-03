@@ -14,6 +14,7 @@ import (
 	"syscall"
 	"text/tabwriter"
 
+	"github.com/tamnd/gomlx/bench"
 	"github.com/tamnd/gomlx/config"
 	"github.com/tamnd/gomlx/engine"
 	"github.com/tamnd/gomlx/models"
@@ -35,6 +36,8 @@ func main() {
 		runServe(args)
 	case "models":
 		runModels(args)
+	case "bench":
+		runBench(args)
 	case "version", "--version", "-v":
 		fmt.Println(version)
 	case "help", "-h", "--help":
@@ -54,6 +57,7 @@ Usage:
 
 Commands:
   serve     Start the inference server
+  bench     Load-test an OpenAI-compatible endpoint
   models    List available model aliases
   version   Show version
   help      Show this help
@@ -134,6 +138,33 @@ func runServe(args []string) {
 		fmt.Fprintf(os.Stderr, "gomlx serve: %v\n", err)
 		os.Exit(1)
 	}
+}
+
+func runBench(args []string) {
+	var cfg bench.Config
+	fs := flag.NewFlagSet("bench", flag.ExitOnError)
+	fs.StringVar(&cfg.URL, "url", "http://127.0.0.1:8000", "base URL of the server")
+	fs.StringVar(&cfg.Model, "model", "", "model name to send in the request")
+	fs.StringVar(&cfg.APIKey, "api-key", "", "bearer API key, if the server requires one")
+	fs.StringVar(&cfg.Prompt, "prompt", "Write a short paragraph about the sea.", "prompt to send")
+	fs.IntVar(&cfg.MaxTokens, "max-tokens", 128, "max output tokens per request")
+	fs.Float64Var(&cfg.Temperature, "temperature", 0, "sampling temperature")
+	fs.IntVar(&cfg.Concurrency, "concurrency", 1, "number of concurrent clients")
+	fs.IntVar(&cfg.Requests, "requests", 0, "total requests (default: one per client)")
+	fs.BoolVar(&cfg.Stream, "stream", false, "stream responses to measure time to first token")
+	_ = fs.Parse(args)
+
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
+	fmt.Printf("benchmarking %s (%d clients, %d requests, stream=%v)\n\n",
+		cfg.URL, cfg.Concurrency, max(cfg.Requests, cfg.Concurrency), cfg.Stream)
+	rep, err := bench.Run(ctx, cfg)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "gomlx bench: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Print(rep.String())
 }
 
 func runModels(args []string) {
