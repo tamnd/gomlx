@@ -43,6 +43,11 @@ type Array struct {
 	shape []int
 }
 
+// CompiledFunc runs a traced compute graph over a fixed list of input arrays and
+// returns the output arrays. Compile produces one; calling it dispatches the
+// whole graph in a single crossing into MLX instead of one op at a time.
+type CompiledFunc func(inputs []Array) ([]Array, error)
+
 // Shape returns the array's dimensions.
 func (a Array) Shape() []int { return a.shape }
 
