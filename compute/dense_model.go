@@ -62,6 +62,11 @@ func newDenseModel(st *SafeTensors, args DenseArgs) (*DenseModel, error) {
 	if m.Norm, err = LoadArray(st, "model.norm.weight"); err != nil {
 		return nil, err
 	}
+	if args.NormOnePlus {
+		if m.Norm, err = onePlus(m.Norm); err != nil {
+			return nil, err
+		}
+	}
 
 	if args.TieWordEmbeddings || !st.Has("lm_head.weight") {
 		m.LMHead = m.Embed
@@ -110,6 +115,14 @@ func newDenseModel(st *SafeTensors, args DenseArgs) (*DenseModel, error) {
 				return nil, err
 			}
 		}
+		if args.NormOnePlus {
+			if m.Layers[i].InputNorm, err = onePlus(m.Layers[i].InputNorm); err != nil {
+				return nil, err
+			}
+			if m.Layers[i].PostAttnNorm, err = onePlus(m.Layers[i].PostAttnNorm); err != nil {
+				return nil, err
+			}
+		}
 	}
 
 	m.SetScale()
@@ -141,6 +154,42 @@ func (m *DenseModel) NewCaches() []LayerCache {
 // exported only so a hand-built test model can set it too.
 func (m *DenseModel) SetScale() {
 	m.scale = float32(1.0 / math.Sqrt(float64(m.Args.HeadDim)))
+}
+
+// onePlus folds the (1 + weight) RMSNorm convention into a loaded norm weight,
+// which is how Gemma applies its norms. The add is done in float32 and cast back
+// to the weight's own dtype, so the fused RMSNorm keeps seeing a plain weight at
+// the original precision.
+func onePlus(w mlxgo.Array) (mlxgo.Array, error) {
+	s, err := mlxgo.AddScalar(w, 1.0)
+	if err != nil {
+		return mlxgo.Array{}, err
+	}
+	return mlxgo.Astype(s, w.DType())
+}
+
+// scaleEmbed multiplies the token embeddings by sqrt(hidden_size) when the
+// architecture calls for it (Gemma), casting back to the embedding dtype so the
+// rest of the forward stays in the model's compute precision.
+func (m *DenseModel) scaleEmbed(h mlxgo.Array) (mlxgo.Array, error) {
+	if !m.Args.EmbedScale {
+		return h, nil
+	}
+	dt := h.DType()
+	s, err := mlxgo.MulScalar(h, float32(math.Sqrt(float64(m.Args.HiddenSize))))
+	if err != nil {
+		return mlxgo.Array{}, err
+	}
+	return mlxgo.Astype(s, dt)
+}
+
+// gate applies the MLP gate activation: the exact GELU for Gemma (GeGLU), SiLU
+// for the other dense families.
+func (m *DenseModel) gate(x mlxgo.Array) (mlxgo.Array, error) {
+	if m.Args.GeGLU {
+		return mlxgo.Gelu(x)
+	}
+	return mlxgo.Silu(x)
 }
 
 // linear computes x @ W^T for a checkpoint weight stored as [out, in].
@@ -193,6 +242,9 @@ func (m *DenseModel) Forward(tokens []int32, caches []LayerCache, offset int) (m
 	h, err := mlxgo.Take(m.Embed, ids) // [seq, hidden]
 	if err != nil {
 		return mlxgo.Array{}, fmt.Errorf("embed: %w", err)
+	}
+	if h, err = m.scaleEmbed(h); err != nil {
+		return mlxgo.Array{}, fmt.Errorf("embed scale: %w", err)
 	}
 
 	for i := range m.Layers {
@@ -308,7 +360,7 @@ func (m *DenseModel) block(h mlxgo.Array, l *DenseLayer, c *LayerCache, seq, off
 	if err != nil {
 		return mlxgo.Array{}, err
 	}
-	gate, err = mlxgo.Silu(gate)
+	gate, err = m.gate(gate)
 	if err != nil {
 		return mlxgo.Array{}, err
 	}
