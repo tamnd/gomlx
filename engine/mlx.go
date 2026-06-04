@@ -20,6 +20,7 @@ import (
 // of the queue depth.
 type MLXEngine struct {
 	name string
+	arch string
 	tok  *tokenizer.Tokenizer
 	run  *compute.Runner
 }
@@ -64,7 +65,7 @@ func NewMLXEngine(name, dir string) (*MLXEngine, error) {
 		MaxBatch: maxBatch(),
 	}
 	runner.Start()
-	return &MLXEngine{name: name, tok: tok, run: runner}, nil
+	return &MLXEngine{name: name, arch: args.Arch, tok: tok, run: runner}, nil
 }
 
 // maxBatch reads the decode batch limit from GOMLX_MAX_BATCH, defaulting to 8.
@@ -179,14 +180,14 @@ func (e *MLXEngine) StreamChat(ctx context.Context, msgs []ChatMessage, p Sampli
 	return e.StreamGenerate(ctx, e.renderChat(msgs), p)
 }
 
-// renderChat applies the Qwen3 ChatML template, ending with an open assistant
-// turn so the model continues the reply.
+// renderChat applies the chat template for the loaded model's family, ending with
+// an open assistant turn so the model continues the reply.
 func (e *MLXEngine) renderChat(msgs []ChatMessage) string {
 	out := make([]tokenizer.ChatMsg, len(msgs))
 	for i, m := range msgs {
 		out[i] = tokenizer.ChatMsg{Role: m.Role, Content: m.Content}
 	}
-	return tokenizer.ApplyChatML(out, true)
+	return tokenizer.ApplyChatTemplate(e.arch, out, true)
 }
 
 // compile-time check.
