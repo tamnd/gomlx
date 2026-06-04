@@ -117,6 +117,48 @@ func TestSilu(t *testing.T) {
 	approx(t, got, []float32{0, 0.7310586, -0.26894143}, 1e-5)
 }
 
+// geluTanhRef is the host reference for the tanh GELU approximation, used to
+// check the device op.
+func geluTanhRef(x float64) float64 {
+	inner := math.Sqrt(2/math.Pi) * (x + 0.044715*x*x*x)
+	return 0.5 * x * (1 + math.Tanh(inner))
+}
+
+func TestGeluTanh(t *testing.T) {
+	in := []float32{0, 1, -1, 2, -2, 0.5}
+	x := mustF32(t, []int{len(in)}, in)
+	out, err := GeluTanh(x)
+	if err != nil {
+		t.Fatalf("GeluTanh: %v", err)
+	}
+	got, _ := out.ToFloat32()
+	want := make([]float32, len(in))
+	for i, v := range in {
+		want[i] = float32(geluTanhRef(float64(v)))
+	}
+	approx(t, got, want, 1e-5)
+}
+
+func TestMulScalar(t *testing.T) {
+	x := mustF32(t, []int{4}, []float32{1, 2, 3, 4})
+	out, err := MulScalar(x, 2.5)
+	if err != nil {
+		t.Fatalf("MulScalar: %v", err)
+	}
+	got, _ := out.ToFloat32()
+	approx(t, got, []float32{2.5, 5, 7.5, 10}, 1e-5)
+}
+
+func TestAddScalar(t *testing.T) {
+	x := mustF32(t, []int{3}, []float32{-1, 0, 1})
+	out, err := AddScalar(x, 1.0)
+	if err != nil {
+		t.Fatalf("AddScalar: %v", err)
+	}
+	got, _ := out.ToFloat32()
+	approx(t, got, []float32{0, 1, 2}, 1e-6)
+}
+
 func TestSoftmaxAxis(t *testing.T) {
 	x := mustF32(t, []int{2, 2}, []float32{1, 1, 0, 2})
 	out, err := SoftmaxAxis(x, 1)
