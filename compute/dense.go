@@ -17,8 +17,17 @@ import (
 // rest do not). Values absent from a given config.json fall back to the family
 // defaults supplied by the arch-specific loader.
 type DenseArgs struct {
-	Arch   string // "qwen3", "qwen2", "llama", or "mistral"
+	Arch   string // "qwen3", "qwen2", "llama", "mistral", or "gemma"
 	QKNorm bool   // per-head query/key RMSNorm before RoPE
+
+	// Gemma differs from the others in three structural details, each off for
+	// the Qwen/Llama/Mistral families. EmbedScale multiplies the token
+	// embeddings by sqrt(hidden_size) before the first layer. GeGLU swaps the
+	// MLP's SiLU gate for the tanh-approximation GELU. NormOnePlus applies the
+	// RMSNorm weight as (1 + weight) rather than weight.
+	EmbedScale  bool
+	GeGLU       bool
+	NormOnePlus bool
 
 	ModelType             string
 	HiddenSize            int
@@ -41,11 +50,14 @@ type DenseArgs struct {
 // checkpoints set rope_theta and rms_norm_eps explicitly, so these matter mainly
 // for terse or older configs.
 type archDefaults struct {
-	arch      string
-	qkNorm    bool
-	attnBias  bool // query/key/value projections carry a bias (Qwen2)
-	ropeTheta float64
-	rmsEps    float64
+	arch        string
+	qkNorm      bool
+	attnBias    bool // query/key/value projections carry a bias (Qwen2)
+	ropeTheta   float64
+	rmsEps      float64
+	embedScale  bool // scale token embeddings by sqrt(hidden_size) (Gemma)
+	geGLU       bool // MLP gate uses GELU rather than SiLU (Gemma)
+	normOnePlus bool // RMSNorm weight applied as (1 + weight) (Gemma)
 }
 
 // rawDense distinguishes "key absent" from "key present and zero" for the fields

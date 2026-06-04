@@ -73,6 +73,9 @@ func AddScalar(a Array, v float32) (Array, error) { return Array{}, ErrUnavailab
 // GeluTanh would compute the tanh approximation of GELU elementwise.
 func GeluTanh(a Array) (Array, error) { return Array{}, ErrUnavailable }
 
+// Gelu would compute the exact GELU elementwise.
+func Gelu(a Array) (Array, error) { return Array{}, ErrUnavailable }
+
 // Argmax would return the index of the maximum along an axis.
 func Argmax(a Array, axis int, keepdims bool) (Array, error) { return Array{}, ErrUnavailable }
 
