@@ -8,15 +8,16 @@ import (
 )
 
 // DenseArgs holds the architecture hyperparameters shared by the dense decoder
-// families this backend runs: Qwen3, Llama, and Mistral. The three are the same
-// pre-norm transformer with grouped-query attention, rotary embeddings, and a
-// SwiGLU MLP; they differ only in a couple of capabilities and a few default
-// values. Arch names the family and QKNorm records whether the attention applies
-// a per-head query/key RMSNorm (Qwen3 does, Llama and Mistral do not). Values
-// absent from a given config.json fall back to the family defaults supplied by
-// the arch-specific loader.
+// families this backend runs: Qwen3, Qwen2, Llama, and Mistral. They are the
+// same pre-norm transformer with grouped-query attention, rotary embeddings, and
+// a SwiGLU MLP; they differ only in a couple of capabilities and a few default
+// values. Arch names the family, QKNorm records whether the attention applies a
+// per-head query/key RMSNorm (Qwen3 does, the rest do not), and AttentionBias
+// records whether the query/key/value projections carry a bias (Qwen2 does, the
+// rest do not). Values absent from a given config.json fall back to the family
+// defaults supplied by the arch-specific loader.
 type DenseArgs struct {
-	Arch   string // "qwen3", "llama", or "mistral"
+	Arch   string // "qwen3", "qwen2", "llama", or "mistral"
 	QKNorm bool   // per-head query/key RMSNorm before RoPE
 
 	ModelType             string
@@ -42,6 +43,7 @@ type DenseArgs struct {
 type archDefaults struct {
 	arch      string
 	qkNorm    bool
+	attnBias  bool // query/key/value projections carry a bias (Qwen2)
 	ropeTheta float64
 	rmsEps    float64
 }
@@ -116,6 +118,13 @@ func loadDenseArgs(configJSON []byte, d archDefaults) (DenseArgs, error) {
 		a.RopeTheta = *r.RopeTheta
 	} else {
 		a.RopeTheta = d.ropeTheta
+	}
+
+	// Qwen2 always biases the attention projections; the field is part of the
+	// architecture rather than the config, so the family default forces it on
+	// even when the config omits attention_bias.
+	if d.attnBias {
+		a.AttentionBias = true
 	}
 
 	if err := a.validate(); err != nil {

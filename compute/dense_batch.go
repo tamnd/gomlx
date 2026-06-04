@@ -153,15 +153,15 @@ func (b *Batch) block(h mlxgo.Array, l *DenseLayer, c *BatchCache, q, offset int
 	if err != nil {
 		return mlxgo.Array{}, err
 	}
-	qp, err := linear(hn, l.QProj)
+	qp, err := projectBias(hn, l.QProj, l.QBias, a.AttentionBias)
 	if err != nil {
 		return mlxgo.Array{}, err
 	}
-	kp, err := linear(hn, l.KProj)
+	kp, err := projectBias(hn, l.KProj, l.KBias, a.AttentionBias)
 	if err != nil {
 		return mlxgo.Array{}, err
 	}
-	vp, err := linear(hn, l.VProj)
+	vp, err := projectBias(hn, l.VProj, l.VBias, a.AttentionBias)
 	if err != nil {
 		return mlxgo.Array{}, err
 	}
