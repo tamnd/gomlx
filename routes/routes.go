@@ -51,42 +51,17 @@ func writeError(w http.ResponseWriter, status int, typ, msg string) {
 	writeJSON(w, status, api.ErrorBody{Error: api.ErrorDetail{Message: msg, Type: typ}})
 }
 
-// messageText flattens a message's Content (string or array of content parts)
-// to plain text. Multimodal parts contribute their text fields; non-text parts
-// are ignored on the text path (handled in the multimodal stage).
-func messageText(content any) string {
-	switch v := content.(type) {
-	case nil:
-		return ""
-	case string:
-		return v
-	case []any:
-		var b []byte
-		for _, part := range v {
-			m, ok := part.(map[string]any)
-			if !ok {
-				continue
-			}
-			if t, _ := m["text"].(string); t != "" {
-				if len(b) > 0 {
-					b = append(b, ' ')
-				}
-				b = append(b, t...)
-			}
-		}
-		return string(b)
-	default:
-		return ""
-	}
-}
-
-// toChatMessages converts API messages to engine messages.
+// toChatMessages converts API messages to engine messages. A message's content
+// may be a plain string or an array of multimodal parts; TextContent flattens
+// either form to the text the engine consumes. Image parts ride along on the
+// API message and are picked up by the multimodal stage rather than dropped
+// here on the text path.
 func toChatMessages(msgs []api.Message) []engine.ChatMessage {
 	out := make([]engine.ChatMessage, len(msgs))
 	for i, m := range msgs {
 		out[i] = engine.ChatMessage{
 			Role:       m.Role,
-			Content:    messageText(m.Content),
+			Content:    m.TextContent(),
 			ToolCallID: m.ToolCallID,
 			Name:       m.Name,
 		}
