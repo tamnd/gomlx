@@ -167,6 +167,77 @@ func TestHasImages(t *testing.T) {
 	}
 }
 
+func TestAudioRefsDecodes(t *testing.T) {
+	raw := []byte{0x52, 0x49, 0x46, 0x46, 0x00, 0x10}
+	enc := base64.StdEncoding.EncodeToString(raw)
+	content := decodeContent(t, `[
+		{"type":"text","text":"transcribe this"},
+		{"type":"input_audio","input_audio":{"data":"`+enc+`","format":"wav"}}
+	]`)
+	refs, err := Message{Content: content}.AudioRefs()
+	if err != nil {
+		t.Fatalf("audio refs: %v", err)
+	}
+	if len(refs) != 1 {
+		t.Fatalf("want 1 audio ref, got %d", len(refs))
+	}
+	if refs[0].Format != "wav" {
+		t.Errorf("format: got %q want wav", refs[0].Format)
+	}
+	if string(refs[0].Data) != string(raw) {
+		t.Errorf("decoded bytes: got %v want %v", refs[0].Data, raw)
+	}
+}
+
+func TestAudioRefsBadBase64(t *testing.T) {
+	content := decodeContent(t, `[
+		{"type":"input_audio","input_audio":{"data":"not valid!!","format":"wav"}}
+	]`)
+	if _, err := (Message{Content: content}).AudioRefs(); err == nil {
+		t.Error("a malformed base64 audio payload must error")
+	}
+}
+
+func TestAudioRefsSkipsEmpty(t *testing.T) {
+	content := decodeContent(t, `[
+		{"type":"input_audio","input_audio":{"data":"","format":"wav"}},
+		{"type":"input_audio"},
+		{"type":"text","text":"x"}
+	]`)
+	refs, err := Message{Content: content}.AudioRefs()
+	if err != nil {
+		t.Fatalf("audio refs: %v", err)
+	}
+	if len(refs) != 0 {
+		t.Errorf("empty and missing audio should be skipped, got %d", len(refs))
+	}
+}
+
+func TestHasAudio(t *testing.T) {
+	enc := base64.StdEncoding.EncodeToString([]byte{1, 2, 3})
+	withAudio := decodeContent(t, `[
+		{"type":"text","text":"x"},
+		{"type":"input_audio","input_audio":{"data":"`+enc+`","format":"mp3"}}
+	]`)
+	if !(Message{Content: withAudio}).HasAudio() {
+		t.Error("content with audio should report HasAudio true")
+	}
+	if (Message{Content: "plain"}).HasAudio() {
+		t.Error("plain text should report HasAudio false")
+	}
+}
+
+func TestTextContentIgnoresAudio(t *testing.T) {
+	enc := base64.StdEncoding.EncodeToString([]byte{1, 2, 3})
+	content := decodeContent(t, `[
+		{"type":"text","text":"only this"},
+		{"type":"input_audio","input_audio":{"data":"`+enc+`","format":"wav"}}
+	]`)
+	if got := (Message{Content: content}).TextContent(); got != "only this" {
+		t.Errorf("TextContent should ignore audio parts, got %q", got)
+	}
+}
+
 func TestDataURLPlainText(t *testing.T) {
 	// A data URL without base64 carries its payload verbatim.
 	ref, err := parseImageURL("data:text/plain,hello")

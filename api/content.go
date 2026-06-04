@@ -26,6 +26,14 @@ type ImageRef struct {
 	IsData    bool
 }
 
+// AudioRef is one audio clip carried by a message: the decoded bytes and the
+// container format they arrived in, such as "wav" or "mp3". OpenAI sends audio
+// inline as base64 rather than by URL, so Data is always present.
+type AudioRef struct {
+	Format string
+	Data   []byte
+}
+
 // Parts normalizes the message content into typed parts. A nil content yields no
 // parts; a string yields a single text part; an array is decoded part by part.
 // Unknown part types are preserved with their Type set so a caller can decide
@@ -109,6 +117,44 @@ func (m Message) HasImages() bool {
 	}
 	for _, p := range parts {
 		if p.Type == "image_url" && p.ImageURL != nil && p.ImageURL.URL != "" {
+			return true
+		}
+	}
+	return false
+}
+
+// AudioRefs returns the audio clips carried by the message, in order, decoding
+// the base64 payload of each. A part whose input_audio is missing or has no data
+// is skipped; a payload that does not decode is an error, since truncated audio
+// is a client mistake worth reporting rather than dropping.
+func (m Message) AudioRefs() ([]AudioRef, error) {
+	parts, err := m.Parts()
+	if err != nil {
+		return nil, err
+	}
+	var refs []AudioRef
+	for _, p := range parts {
+		if p.Type != "input_audio" || p.InputAudio == nil || p.InputAudio.Data == "" {
+			continue
+		}
+		data, err := base64.StdEncoding.DecodeString(p.InputAudio.Data)
+		if err != nil {
+			return nil, fmt.Errorf("content: decode base64 audio: %w", err)
+		}
+		refs = append(refs, AudioRef{Format: p.InputAudio.Format, Data: data})
+	}
+	return refs, nil
+}
+
+// HasAudio reports whether the message carries any audio parts, without decoding
+// them.
+func (m Message) HasAudio() bool {
+	parts, err := m.Parts()
+	if err != nil {
+		return false
+	}
+	for _, p := range parts {
+		if p.Type == "input_audio" && p.InputAudio != nil && p.InputAudio.Data != "" {
 			return true
 		}
 	}
