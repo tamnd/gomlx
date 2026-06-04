@@ -11,16 +11,21 @@ import (
 
 // DenseLayer holds the weights of one transformer block. Names follow the
 // Hugging Face checkpoint: the four attention projections, the optional per-head
-// query and key norms (Qwen3 only), the two layer norms, and the three MLP
-// projections. All projection weights are stored as the checkpoint stores them,
-// shaped [out_features, in_features]. QNorm and KNorm are left as zero-value
-// arrays for architectures that do not use them.
+// query and key norms (Qwen3 only), the optional query/key/value projection
+// biases (Qwen2 only), the two layer norms, and the three MLP projections. All
+// projection weights are stored as the checkpoint stores them, shaped
+// [out_features, in_features]; the biases are [out_features]. QNorm, KNorm, and
+// the bias arrays are left as zero-value arrays for architectures that do not
+// use them.
 type DenseLayer struct {
 	InputNorm    mlxgo.Array
 	QProj        mlxgo.Array
 	KProj        mlxgo.Array
 	VProj        mlxgo.Array
 	OProj        mlxgo.Array
+	QBias        mlxgo.Array
+	KBias        mlxgo.Array
+	VBias        mlxgo.Array
 	QNorm        mlxgo.Array
 	KNorm        mlxgo.Array
 	PostAttnNorm mlxgo.Array
@@ -94,6 +99,17 @@ func newDenseModel(st *SafeTensors, args DenseArgs) (*DenseModel, error) {
 				return nil, err
 			}
 		}
+		if args.AttentionBias {
+			if m.Layers[i].QBias, err = LoadArray(st, p+"self_attn.q_proj.bias"); err != nil {
+				return nil, err
+			}
+			if m.Layers[i].KBias, err = LoadArray(st, p+"self_attn.k_proj.bias"); err != nil {
+				return nil, err
+			}
+			if m.Layers[i].VBias, err = LoadArray(st, p+"self_attn.v_proj.bias"); err != nil {
+				return nil, err
+			}
+		}
 	}
 
 	m.SetScale()
@@ -134,6 +150,23 @@ func linear(x, w mlxgo.Array) (mlxgo.Array, error) {
 		return mlxgo.Array{}, err
 	}
 	return mlxgo.MatMul(x, wt)
+}
+
+// projectBias computes x @ W^T and adds the projection bias when the
+// architecture uses one. Qwen2 biases the query, key, and value projections;
+// Qwen3, Llama, and Mistral do not, in which case bias is a zero-value array and
+// is ignored. The bias is [out], which broadcasts over the leading axes of the
+// result, so the same helper serves the single-stream [seq, out] and the batched
+// [n, q, out] shapes alike.
+func projectBias(x, w, bias mlxgo.Array, hasBias bool) (mlxgo.Array, error) {
+	y, err := linear(x, w)
+	if err != nil {
+		return mlxgo.Array{}, err
+	}
+	if !hasBias {
+		return y, nil
+	}
+	return mlxgo.Add(y, bias)
 }
 
 // Forward runs the model over tokens, appending to the per-layer caches, and
@@ -190,15 +223,15 @@ func (m *DenseModel) block(h mlxgo.Array, l *DenseLayer, c *LayerCache, seq, off
 	if err != nil {
 		return mlxgo.Array{}, err
 	}
-	q, err := linear(hn, l.QProj)
+	q, err := projectBias(hn, l.QProj, l.QBias, a.AttentionBias)
 	if err != nil {
 		return mlxgo.Array{}, err
 	}
-	k, err := linear(hn, l.KProj)
+	k, err := projectBias(hn, l.KProj, l.KBias, a.AttentionBias)
 	if err != nil {
 		return mlxgo.Array{}, err
 	}
-	v, err := linear(hn, l.VProj)
+	v, err := projectBias(hn, l.VProj, l.VBias, a.AttentionBias)
 	if err != nil {
 		return mlxgo.Array{}, err
 	}
