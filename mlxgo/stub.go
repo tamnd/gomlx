@@ -64,6 +64,15 @@ func Multiply(a, b Array) (Array, error) { return Array{}, ErrUnavailable }
 // Silu would compute x * sigmoid(x).
 func Silu(a Array) (Array, error) { return Array{}, ErrUnavailable }
 
+// MulScalar would multiply every element of a by a host float.
+func MulScalar(a Array, v float32) (Array, error) { return Array{}, ErrUnavailable }
+
+// AddScalar would add a host float to every element of a.
+func AddScalar(a Array, v float32) (Array, error) { return Array{}, ErrUnavailable }
+
+// GeluTanh would compute the tanh approximation of GELU elementwise.
+func GeluTanh(a Array) (Array, error) { return Array{}, ErrUnavailable }
+
 // Argmax would return the index of the maximum along an axis.
 func Argmax(a Array, axis int, keepdims bool) (Array, error) { return Array{}, ErrUnavailable }
 

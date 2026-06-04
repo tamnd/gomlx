@@ -56,6 +56,61 @@ static int gomlx_sdpa_mask(mlx_array* res, mlx_array q, mlx_array k, mlx_array v
     return rc;
 }
 
+// mul_scalar multiplies an array by a host float, broadcasting the scalar over
+// every element. It builds the scalar array on the C side so the Go wrapper
+// stays a single call and the temporary is freed here.
+static int gomlx_mul_scalar(mlx_array* res, mlx_array a, float v, mlx_stream s) {
+    mlx_array c = mlx_array_new_float32(v);
+    int rc = mlx_multiply(res, a, c, s);
+    mlx_array_free(c);
+    return rc;
+}
+
+// add_scalar adds a host float to every element of an array.
+static int gomlx_add_scalar(mlx_array* res, mlx_array a, float v, mlx_stream s) {
+    mlx_array c = mlx_array_new_float32(v);
+    int rc = mlx_add(res, a, c, s);
+    mlx_array_free(c);
+    return rc;
+}
+
+// gelu_tanh computes the tanh approximation of GELU,
+//   0.5 * x * (1 + tanh( sqrt(2/pi) * (x + 0.044715 * x^3) )),
+// which is the "gelu_pytorch_tanh" activation some dense families use in their
+// MLP. mlx-c has no fused gelu, so it is built from elementwise primitives; the
+// scalar constants are created once and every intermediate is freed before the
+// call returns.
+static int gomlx_gelu_tanh(mlx_array* res, mlx_array x, mlx_stream s) {
+    mlx_array kappa = mlx_array_new_float32(0.044715f);
+    mlx_array beta  = mlx_array_new_float32(0.7978845608028654f); // sqrt(2/pi)
+    mlx_array one   = mlx_array_new_float32(1.0f);
+    mlx_array half  = mlx_array_new_float32(0.5f);
+    mlx_array x2 = mlx_array_new();
+    mlx_array x3 = mlx_array_new();
+    mlx_array kx3 = mlx_array_new();
+    mlx_array inner = mlx_array_new();
+    mlx_array scaled = mlx_array_new();
+    mlx_array t = mlx_array_new();
+    mlx_array onePlus = mlx_array_new();
+    mlx_array halfx = mlx_array_new();
+    int rc = 0;
+    if ((rc = mlx_multiply(&x2, x, x, s))) goto done;
+    if ((rc = mlx_multiply(&x3, x2, x, s))) goto done;
+    if ((rc = mlx_multiply(&kx3, kappa, x3, s))) goto done;
+    if ((rc = mlx_add(&inner, x, kx3, s))) goto done;
+    if ((rc = mlx_multiply(&scaled, beta, inner, s))) goto done;
+    if ((rc = mlx_tanh(&t, scaled, s))) goto done;
+    if ((rc = mlx_add(&onePlus, one, t, s))) goto done;
+    if ((rc = mlx_multiply(&halfx, half, x, s))) goto done;
+    rc = mlx_multiply(res, halfx, onePlus, s);
+done:
+    mlx_array_free(kappa); mlx_array_free(beta); mlx_array_free(one);
+    mlx_array_free(half); mlx_array_free(x2); mlx_array_free(x3);
+    mlx_array_free(kx3); mlx_array_free(inner); mlx_array_free(scaled);
+    mlx_array_free(t); mlx_array_free(onePlus); mlx_array_free(halfx);
+    return rc;
+}
+
 // gomlxCompileTrampoline is the Go callback that traces a compiled function. It
 // is declared here so the closure builder below can take its address; the
 // definition lives in compile.go (an //export file cannot also define C
@@ -284,6 +339,38 @@ func Silu(a Array) (Array, error) {
 	defer C.mlx_array_free(sig)
 	var res C.mlx_array
 	if err := check(C.mlx_multiply(&res, arrayHandle(a), sig, gpuStream), "silu mul"); err != nil {
+		return Array{}, err
+	}
+	return wrap(res), nil
+}
+
+// MulScalar multiplies every element of a by the host float v. It is the
+// embedding scale step for families that multiply the token embeddings by
+// sqrt(hidden_size) before the first layer.
+func MulScalar(a Array, v float32) (Array, error) {
+	var res C.mlx_array
+	if err := check(C.gomlx_mul_scalar(&res, arrayHandle(a), C.float(v), gpuStream), "mul_scalar"); err != nil {
+		return Array{}, err
+	}
+	return wrap(res), nil
+}
+
+// AddScalar adds the host float v to every element of a. It is used to fold the
+// (1 + weight) RMSNorm convention into the loaded norm weights once at load
+// time, so the fused RMSNorm can keep multiplying by a plain weight.
+func AddScalar(a Array, v float32) (Array, error) {
+	var res C.mlx_array
+	if err := check(C.gomlx_add_scalar(&res, arrayHandle(a), C.float(v), gpuStream), "add_scalar"); err != nil {
+		return Array{}, err
+	}
+	return wrap(res), nil
+}
+
+// GeluTanh computes the tanh approximation of GELU elementwise, the
+// gelu_pytorch_tanh activation used in some dense MLPs.
+func GeluTanh(a Array) (Array, error) {
+	var res C.mlx_array
+	if err := check(C.gomlx_gelu_tanh(&res, arrayHandle(a), gpuStream), "gelu_tanh"); err != nil {
 		return Array{}, err
 	}
 	return wrap(res), nil
