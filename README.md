@@ -143,10 +143,14 @@ gomlx is about 1.2x ahead on both tokens per second and requests per second.
 
 It trails on long, decode-bound runs. Single-stream throughput is set by the same Metal kernels for
 both, and there gomlx tracks the hardware within about ten percent. Under sustained 128-token decode
-the baseline pulls ahead because it compiles its model forward into one fused graph per step, while
-gomlx still issues each MLX operation eagerly across the cgo boundary. Closing that gap means adding
-graph compilation to the binding so a decode step is a single dispatch rather than dozens. That work
-is tracked separately; the numbers above are reported as measured, wins and losses both.
+the baseline pulls ahead. The binding can compile a function into a single fused graph, and we
+measured the decode path with it: at this model size and batch, fusing the per-layer feed-forward into
+one dispatch made no reliable difference. The step is dominated by GPU kernel time, and the lazy
+runtime already coalesces most of the per-operation dispatch, so removing cgo crossings there buys
+little. The remaining gap is a kernel-parity ceiling, not call overhead: both paths run the same
+kernels, so on pure decode gomlx approaches the baseline rather than overtaking it. The wins are in
+serving overhead and concurrent throughput on short requests, where request handling dominates and Go
+pulls well ahead; the numbers above are reported as measured, wins and losses both.
 
 ## License
 
