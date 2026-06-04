@@ -55,6 +55,16 @@ static int gomlx_sdpa_mask(mlx_array* res, mlx_array q, mlx_array k, mlx_array v
     mlx_vector_array_free(mv);
     return rc;
 }
+
+// gomlxCompileTrampoline is the Go callback that traces a compiled function. It
+// is declared here so the closure builder below can take its address; the
+// definition lives in compile.go (an //export file cannot also define C
+// functions in its preamble). gomlx_new_compile_closure has external linkage so
+// compile.go can call it through an extern declaration.
+extern int gomlxCompileTrampoline(mlx_vector_array* res, const mlx_vector_array input, void* payload);
+mlx_closure gomlx_new_compile_closure(void* payload) {
+    return mlx_closure_new_func_payload(gomlxCompileTrampoline, payload, free);
+}
 */
 import "C"
 

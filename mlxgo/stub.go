@@ -95,3 +95,9 @@ func (a Array) DType() DType { return F32 }
 func QuantizedMatmul(x, w, scales, biases Array, transpose bool, groupSize, bits int) (Array, error) {
 	return Array{}, ErrUnavailable
 }
+
+// Compile would trace a function into a single MLX graph. Without the runtime
+// there is nothing to trace, so it reports the backend is unavailable.
+func Compile(fn CompiledFunc, shapeless bool) (CompiledFunc, error) {
+	return nil, ErrUnavailable
+}
