@@ -23,8 +23,8 @@ type DenseArgs struct {
 	// Gemma differs from the others in three structural details, each off for
 	// the Qwen/Llama/Mistral families. EmbedScale multiplies the token
 	// embeddings by sqrt(hidden_size) before the first layer. GeGLU swaps the
-	// MLP's SiLU gate for the tanh-approximation GELU. NormOnePlus applies the
-	// RMSNorm weight as (1 + weight) rather than weight.
+	// MLP's SiLU gate for the exact GELU. NormOnePlus applies the RMSNorm weight
+	// as (1 + weight) rather than weight.
 	EmbedScale  bool
 	GeGLU       bool
 	NormOnePlus bool
@@ -93,6 +93,9 @@ func loadDenseArgs(configJSON []byte, d archDefaults) (DenseArgs, error) {
 	a := DenseArgs{
 		Arch:                  d.arch,
 		QKNorm:                d.qkNorm,
+		EmbedScale:            d.embedScale,
+		GeGLU:                 d.geGLU,
+		NormOnePlus:           d.normOnePlus,
 		ModelType:             r.ModelType,
 		HiddenSize:            r.HiddenSize,
 		IntermediateSize:      r.IntermediateSize,
@@ -175,6 +178,8 @@ func LoadArgs(configJSON []byte) (DenseArgs, error) {
 		return LoadQwen2Args(configJSON)
 	case "llama", "mistral":
 		return LoadLlamaArgs(configJSON)
+	case "gemma":
+		return LoadGemmaArgs(configJSON)
 	case "":
 		return DenseArgs{}, fmt.Errorf("compute: config.json has no model_type")
 	default:

@@ -138,6 +138,9 @@ func (b *Batch) embed(ids []int32, n, q int) (mlxgo.Array, error) {
 	if err != nil {
 		return mlxgo.Array{}, fmt.Errorf("embed: %w", err)
 	}
+	if h, err = b.m.scaleEmbed(h); err != nil {
+		return mlxgo.Array{}, fmt.Errorf("embed scale: %w", err)
+	}
 	return mlxgo.Reshape(h, []int{n, q, b.m.Args.HiddenSize})
 }
 
@@ -230,7 +233,7 @@ func (b *Batch) block(h mlxgo.Array, l *DenseLayer, c *BatchCache, q, offset int
 	if err != nil {
 		return mlxgo.Array{}, err
 	}
-	if gate, err = mlxgo.Silu(gate); err != nil {
+	if gate, err = b.m.gate(gate); err != nil {
 		return mlxgo.Array{}, err
 	}
 	up, err := linear(hn2, l.Up)

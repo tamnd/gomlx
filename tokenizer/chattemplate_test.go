@@ -55,6 +55,34 @@ func TestApplyChatTemplateMistralMultiTurn(t *testing.T) {
 	}
 }
 
+func TestApplyChatTemplateGemma(t *testing.T) {
+	got := ApplyChatTemplate("gemma", convo, true)
+	// System folds into the first user turn; the assistant role is named "model";
+	// the prompt ends with an open model turn.
+	want := "<bos>" +
+		"<start_of_turn>user\nBe brief.\n\nHi<end_of_turn>\n" +
+		"<start_of_turn>model\n"
+	if got != want {
+		t.Errorf("gemma template:\n got %q\nwant %q", got, want)
+	}
+}
+
+func TestApplyChatTemplateGemmaMultiTurn(t *testing.T) {
+	msgs := []ChatMsg{
+		{Role: "user", Content: "Hi"},
+		{Role: "assistant", Content: "Hello"},
+		{Role: "user", Content: "Bye"},
+	}
+	got := ApplyChatTemplate("gemma", msgs, false)
+	want := "<bos>" +
+		"<start_of_turn>user\nHi<end_of_turn>\n" +
+		"<start_of_turn>model\nHello<end_of_turn>\n" +
+		"<start_of_turn>user\nBye<end_of_turn>\n"
+	if got != want {
+		t.Errorf("gemma multi-turn:\n got %q\nwant %q", got, want)
+	}
+}
+
 func TestApplyChatTemplateChatMLForQwen(t *testing.T) {
 	for _, arch := range []string{"qwen3", "qwen2", "somethingelse"} {
 		got := ApplyChatTemplate(arch, convo, true)

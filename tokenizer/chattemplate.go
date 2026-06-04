@@ -7,15 +7,17 @@ import "strings"
 // Each model family wraps a conversation in its own marker format before the
 // text is tokenized, and a model trained on one format produces garbage when fed
 // another. ApplyChatTemplate renders a conversation for a given family: the Qwen
-// families use ChatML, Llama uses the Llama 3 header format, and Mistral uses the
-// [INST] format. An unrecognized family falls back to ChatML, which is the most
-// common modern default.
+// families use ChatML, Llama uses the Llama 3 header format, Mistral uses the
+// [INST] format, and Gemma uses its <start_of_turn> format. An unrecognized
+// family falls back to ChatML, which is the most common modern default.
 func ApplyChatTemplate(arch string, msgs []ChatMsg, addGenerationPrompt bool) string {
 	switch arch {
 	case "llama":
 		return applyLlama3(msgs, addGenerationPrompt)
 	case "mistral":
 		return applyMistral(msgs)
+	case "gemma":
+		return applyGemma(msgs, addGenerationPrompt)
 	default: // qwen3, qwen2, and any unknown family
 		return ApplyChatML(msgs, addGenerationPrompt)
 	}
@@ -71,6 +73,44 @@ func applyMistral(msgs []ChatMsg) string {
 			b.WriteString(m.Content)
 			b.WriteString("</s>")
 		}
+	}
+	return b.String()
+}
+
+// applyGemma renders messages in Gemma's format: a single begin-of-sequence
+// marker, then each turn wrapped as <start_of_turn>role\n ... <end_of_turn>\n
+// with the content trimmed. Gemma names the assistant role "model" and has no
+// system role, so a leading system message is folded into the first user turn.
+// With addGenerationPrompt set the string ends with an open model turn so the
+// model continues from there.
+func applyGemma(msgs []ChatMsg, addGenerationPrompt bool) string {
+	var b strings.Builder
+	b.WriteString("<bos>")
+	var system string
+	for _, m := range msgs {
+		role, content := m.Role, m.Content
+		switch role {
+		case "system":
+			if system != "" {
+				system += "\n\n"
+			}
+			system += content
+			continue
+		case "assistant":
+			role = "model"
+		}
+		if role == "user" && system != "" {
+			content = system + "\n\n" + content
+			system = ""
+		}
+		b.WriteString("<start_of_turn>")
+		b.WriteString(role)
+		b.WriteString("\n")
+		b.WriteString(strings.TrimSpace(content))
+		b.WriteString("<end_of_turn>\n")
+	}
+	if addGenerationPrompt {
+		b.WriteString("<start_of_turn>model\n")
 	}
 	return b.String()
 }
