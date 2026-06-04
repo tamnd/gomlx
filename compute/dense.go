@@ -159,6 +159,8 @@ func LoadArgs(configJSON []byte) (DenseArgs, error) {
 	switch mt {
 	case "qwen3":
 		return LoadQwen3Args(configJSON)
+	case "qwen2":
+		return LoadQwen2Args(configJSON)
 	case "llama", "mistral":
 		return LoadLlamaArgs(configJSON)
 	case "":
