@@ -106,7 +106,7 @@ func TestLoadArgsDispatch(t *testing.T) {
 		},
 		{
 			name: "unsupported type",
-			cfg:  `{"model_type":"gemma","hidden_size":8,"num_hidden_layers":1,"num_attention_heads":2,"vocab_size":10}`,
+			cfg:  `{"model_type":"mamba","hidden_size":8,"num_hidden_layers":1,"num_attention_heads":2,"vocab_size":10}`,
 			ok:   false,
 		},
 		{
