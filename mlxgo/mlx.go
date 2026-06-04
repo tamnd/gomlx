@@ -111,6 +111,31 @@ done:
     return rc;
 }
 
+// gelu computes the exact GELU, 0.5 * x * (1 + erf(x / sqrt(2))), the activation
+// some dense MLPs use (as distinct from the tanh approximation). It is built
+// from erf plus elementwise multiply and add over cached scalar constants, with
+// every intermediate freed before returning.
+static int gomlx_gelu(mlx_array* res, mlx_array x, mlx_stream s) {
+    mlx_array invSqrt2 = mlx_array_new_float32(0.7071067811865476f); // 1/sqrt(2)
+    mlx_array one  = mlx_array_new_float32(1.0f);
+    mlx_array half = mlx_array_new_float32(0.5f);
+    mlx_array scaled = mlx_array_new();
+    mlx_array e = mlx_array_new();
+    mlx_array onePlus = mlx_array_new();
+    mlx_array halfx = mlx_array_new();
+    int rc = 0;
+    if ((rc = mlx_multiply(&scaled, x, invSqrt2, s))) goto done;
+    if ((rc = mlx_erf(&e, scaled, s))) goto done;
+    if ((rc = mlx_add(&onePlus, one, e, s))) goto done;
+    if ((rc = mlx_multiply(&halfx, half, x, s))) goto done;
+    rc = mlx_multiply(res, halfx, onePlus, s);
+done:
+    mlx_array_free(invSqrt2); mlx_array_free(one); mlx_array_free(half);
+    mlx_array_free(scaled); mlx_array_free(e); mlx_array_free(onePlus);
+    mlx_array_free(halfx);
+    return rc;
+}
+
 // gomlxCompileTrampoline is the Go callback that traces a compiled function. It
 // is declared here so the closure builder below can take its address; the
 // definition lives in compile.go (an //export file cannot also define C
@@ -371,6 +396,16 @@ func AddScalar(a Array, v float32) (Array, error) {
 func GeluTanh(a Array) (Array, error) {
 	var res C.mlx_array
 	if err := check(C.gomlx_gelu_tanh(&res, arrayHandle(a), gpuStream), "gelu_tanh"); err != nil {
+		return Array{}, err
+	}
+	return wrap(res), nil
+}
+
+// Gelu computes the exact GELU, 0.5*x*(1+erf(x/sqrt(2))), elementwise. It is the
+// activation Gemma uses in its MLP, as opposed to the tanh approximation.
+func Gelu(a Array) (Array, error) {
+	var res C.mlx_array
+	if err := check(C.gomlx_gelu(&res, arrayHandle(a), gpuStream), "gelu"); err != nil {
 		return Array{}, err
 	}
 	return wrap(res), nil

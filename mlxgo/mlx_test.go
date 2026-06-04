@@ -139,6 +139,22 @@ func TestGeluTanh(t *testing.T) {
 	approx(t, got, want, 1e-5)
 }
 
+func TestGelu(t *testing.T) {
+	in := []float32{0, 1, -1, 2, -2, 0.5}
+	x := mustF32(t, []int{len(in)}, in)
+	out, err := Gelu(x)
+	if err != nil {
+		t.Fatalf("Gelu: %v", err)
+	}
+	got, _ := out.ToFloat32()
+	want := make([]float32, len(in))
+	for i, v := range in {
+		// Exact GELU: 0.5*x*(1+erf(x/sqrt(2))).
+		want[i] = float32(0.5 * float64(v) * (1 + math.Erf(float64(v)/math.Sqrt2)))
+	}
+	approx(t, got, want, 1e-5)
+}
+
 func TestMulScalar(t *testing.T) {
 	x := mustF32(t, []int{4}, []float32{1, 2, 3, 4})
 	out, err := MulScalar(x, 2.5)
